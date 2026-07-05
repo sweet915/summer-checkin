@@ -165,6 +165,10 @@
         .child-select-card:hover { border-color: var(--accent); }
         .child-select-card.selected { border-color: var(--accent); background: var(--accent-light); }
 
+        /* 顶部栏孩子下拉框 */
+        #currentChildBadge { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 6px center; padding-right: 20px !important; }
+        #currentChildBadge option { background: var(--bg-card); color: var(--text-primary); }
+
         /* 头像 */
         .avatar-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
         .child-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
@@ -208,9 +212,10 @@
         .task-group-card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); transition: var(--transition); }
         .task-group-card:hover { border-color: var(--accent); }
         .task-group-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-        .task-group-expand { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
-        .task-group-expand.open { grid-template-rows: 1fr; }
-        .task-group-expand > div { overflow: hidden; }
+        .task-group-expand { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .task-group-expand.open { max-height: 2000px; }
+        .parent-icon-btn { transition: all 0.2s ease; }
+        .parent-icon-btn.selected { border-color: var(--accent) !important; background: var(--accent-light) !important; transform: scale(1.1); }
         .task-group-progress { height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; margin-top: 8px; }
         .task-group-progress > div { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
         .task-group-subtask { padding: 10px 16px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
@@ -258,18 +263,19 @@
         <div style="background: var(--accent-gradient); color:white; padding:16px 20px; position:sticky; top:0; z-index:30;">
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <div id="headerAvatar" class="avatar-circle" style="background:rgba(255,255,255,0.2); color:white; font-size:20px; cursor:pointer;" onclick="if(appData.role==='parent')UIManager.showEditParentModal()">👤</div>
+                    <div id="headerAvatar" class="avatar-circle" style="background:rgba(255,255,255,0.2); color:white; font-size:20px;" onclick="if(appData.role==='parent')UIManager.showEditParentModal()">👤</div>
                     <div>
-                        <div id="headerName" style="font-weight:bold; font-size:16px; cursor:pointer;" onclick="if(appData.role==='parent')UIManager.showEditParentModal()">加载中...</div>
+                        <div id="headerName" style="font-weight:bold; font-size:16px;" onclick="if(appData.role==='parent')UIManager.showEditParentModal()">加载中...</div>
                         <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
                             <span id="headerRole" class="role-badge role-parent">家长</span>
-                            <span id="currentChildBadge" style="display:none; background:rgba(255,255,255,0.3); color:white; padding:3px 10px; border-radius:12px; font-size:12px; cursor:pointer;" onclick="ChildManager.showParentChildSelector()">当前：未选择 <i class="fas fa-chevron-down" style="font-size:10px; margin-left:2px;"></i></span>
+                            <select id="currentChildBadge" style="display:none; background-color:rgba(255,255,255,0.3); color:white; padding:3px 8px; border-radius:12px; font-size:12px; border:none; cursor:pointer; outline:none;"></select>
                         </div>
                     </div>
                 </div>
                 <div style="display:flex; gap:12px;">
+                    <button onclick="App.toggleRole()" class="btn" style="background:rgba(255,255,255,0.2); border:none; color:white; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="切换角色"><i class="fas fa-exchange-alt"></i></button>
                     <button onclick="App.showDataSync()" class="btn" style="background:rgba(255,255,255,0.2); border:none; color:white; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="数据同步"><i class="fas fa-sync-alt"></i></button>
-                    <button onclick="App.toggleRole()" id="roleSwitchBtn" class="btn" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:4px;"><i class="fas fa-exchange-alt"></i> <span id="roleSwitchText">切换角色</span></button><button class="theme-toggle" onclick="ThemeManager.toggle()" title="切换主题">🌙</button>
+                    <button class="theme-toggle" onclick="ThemeManager.toggle()" title="切换主题">🌙</button>
                 </div>
             </div>
         </div>
@@ -442,6 +448,7 @@
             <form id="childForm" onsubmit="ChildManager.saveChild(event)">
                 <input type="hidden" id="childEditId">
                 <div style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">姓名</label><input type="text" id="childName" placeholder="孩子姓名" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div>
+                <div style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">头像</label><input type="hidden" id="childAvatarIcon" value="🧒"><div style="display:flex; gap:16px;"><div style="flex:1;"><div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">男孩</div><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;"><button type="button" onclick="ChildManager.selectChildAvatar('👦')" class="child-avatar-btn" data-icon="👦" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:22px; text-align:center; aspect-ratio:1;">👦</button><button type="button" onclick="ChildManager.selectChildAvatar('👦🏻')" class="child-avatar-btn" data-icon="👦🏻" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:22px; text-align:center; aspect-ratio:1;">👦🏻</button><button type="button" onclick="ChildManager.selectChildAvatar('👱')" class="child-avatar-btn" data-icon="👱" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:22px; text-align:center; aspect-ratio:1;">👱</button></div></div><div style="flex:1;"><div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px;">女孩</div><div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;"><button type="button" onclick="ChildManager.selectChildAvatar('👧')" class="child-avatar-btn" data-icon="👧" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:22px; text-align:center; aspect-ratio:1;">👧</button><button type="button" onclick="ChildManager.selectChildAvatar('👧🏻')" class="child-avatar-btn" data-icon="👧🏻" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:22px; text-align:center; aspect-ratio:1;">👧🏻</button><button type="button" onclick="ChildManager.selectChildAvatar('👱‍♀️')" class="child-avatar-btn" data-icon="👱‍♀️" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:22px; text-align:center; aspect-ratio:1;">👱‍♀️</button></div></div></div></div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;"><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">年龄</label><input type="number" id="childAge" placeholder="8" min="1" max="18" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">年级</label><select id="childGrade" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"><option value="幼儿园">幼儿园</option><option value="一年级">一年级</option><option value="二年级">二年级</option><option value="三年级">三年级</option><option value="四年级">四年级</option><option value="五年级">五年级</option><option value="六年级">六年级</option><option value="初一">初一</option><option value="初二">初二</option><option value="初三">初三</option><option value="高一">高一</option><option value="高二">高二</option><option value="高三">高三</option></select></div></div>
                 <div style="display:flex; gap:12px;"><button type="button" onclick="UIManager.closeModal('childModal')" class="btn" style="flex:1; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">取消</button><button type="submit" class="btn" style="flex:1; padding:14px; border:none; background:var(--accent); color:white; border-radius:12px; cursor:pointer; font-weight:600;">保存</button></div>
             </form>
@@ -472,10 +479,40 @@
         </div>
     </div>
 
+    <!-- 编辑孩子头像 -->
+    <div id="childAvatarModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">🎨 编辑<span id="childAvatarModalName">孩子</span>头像</h3><button onclick="UIManager.closeModal('childAvatarModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div>
+            <input type="hidden" id="childAvatarModalSelected" value="🧒">
+            <div style="display:flex; gap:16px; margin-bottom:24px;">
+                <div style="flex:1;">
+                    <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px; font-weight:600;">男孩</div>
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+                        <button type="button" onclick="ChildManager.selectChildAvatarModal('👦')" class="child-avatar-modal-btn" data-icon="👦" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center; aspect-ratio:1;">👦</button>
+                        <button type="button" onclick="ChildManager.selectChildAvatarModal('👦🏻')" class="child-avatar-modal-btn" data-icon="👦🏻" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center; aspect-ratio:1;">👦🏻</button>
+                        <button type="button" onclick="ChildManager.selectChildAvatarModal('👱')" class="child-avatar-modal-btn" data-icon="👱" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center; aspect-ratio:1;">👱</button>
+                    </div>
+                </div>
+                <div style="flex:1;">
+                    <div style="font-size:12px; color:var(--text-secondary); margin-bottom:6px; font-weight:600;">女孩</div>
+                    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+                        <button type="button" onclick="ChildManager.selectChildAvatarModal('👧')" class="child-avatar-modal-btn" data-icon="👧" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center; aspect-ratio:1;">👧</button>
+                        <button type="button" onclick="ChildManager.selectChildAvatarModal('👧🏻')" class="child-avatar-modal-btn" data-icon="👧🏻" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center; aspect-ratio:1;">👧🏻</button>
+                        <button type="button" onclick="ChildManager.selectChildAvatarModal('👱‍♀️')" class="child-avatar-modal-btn" data-icon="👱‍♀️" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center; aspect-ratio:1;">👱‍♀️</button>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; gap:12px;">
+                <button onclick="UIManager.closeModal('childAvatarModal')" class="btn" style="flex:1; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">取消</button>
+                <button onclick="ChildManager.saveChildAvatar()" class="btn" style="flex:1; padding:14px; border:none; background:var(--accent); color:white; border-radius:12px; cursor:pointer; font-weight:600;">保存</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 数据同步 -->
     <div id="syncModal" class="modal-overlay">
         <div class="modal-panel" style="padding:24px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">🔄 多设备同步</h3><button onclick="UIManager.closeModal('syncModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">🔄 多设备同步-功能建设中</h3><button onclick="UIManager.closeModal('syncModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div>
             <div style="margin-bottom:20px;">
                 <p style="color:var(--text-secondary); font-size:14px; line-height:1.6; margin-bottom:16px;">在多台设备间同步数据（如家长手机和孩子手机）：</p>
                 <div style="background:var(--accent-light); border-radius:12px; padding:16px; margin-bottom:16px;"><div style="font-weight:600; color:var(--accent-text); margin-bottom:8px;">📤 发送数据</div><p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">在一台设备上点击"生成分享码"，复制生成的代码</p><button onclick="DataManager.generateShareCode()" class="btn" style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600;"><i class="fas fa-qrcode"></i> 生成分享码</button><div id="shareCodeDisplay" style="margin-top:12px; display:none;"><div style="background:var(--bg-card); border:2px dashed var(--accent); border-radius:12px; padding:16px; text-align:center;"><div id="shareCode" style="font-size:24px; font-weight:bold; color:var(--accent); letter-spacing:4px; font-family:monospace;"></div><p style="font-size:12px; color:var(--text-secondary); margin-top:8px;">有效期10分钟，请尽快在另一台设备输入</p></div><button onclick="DataManager.copyShareCode()" class="btn" style="width:100%; margin-top:8px; padding:10px; background:var(--accent-light); color:var(--accent-text); border:none; border-radius:8px; cursor:pointer; font-size:13px;"><i class="fas fa-copy"></i> 复制分享码</button></div></div>
@@ -514,8 +551,8 @@
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">&#9999; 编辑家长信息</h3><button onclick="UIManager.closeModal('parentEditModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">&#215;</button></div>
             <div style="margin-bottom:20px;">
                 <label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:8px;">选择图标</label>
-                <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:10px;" id="parentIconGrid">
-<button onclick="UIManager.selectParentIcon('👨‍👩‍👧')" class="parent-icon-btn" data-icon="👨‍👩‍👧" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨‍👩‍👧</button><button onclick="UIManager.selectParentIcon('👨')" class="parent-icon-btn" data-icon="👨" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨</button><button onclick="UIManager.selectParentIcon('👩')" class="parent-icon-btn" data-icon="👩" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👩</button><button onclick="UIManager.selectParentIcon('👴')" class="parent-icon-btn" data-icon="👴" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👴</button><button onclick="UIManager.selectParentIcon('👵')" class="parent-icon-btn" data-icon="👵" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👵</button><button onclick="UIManager.selectParentIcon('🧑')" class="parent-icon-btn" data-icon="🧑" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🧑</button><button onclick="UIManager.selectParentIcon('👨‍💼')" class="parent-icon-btn" data-icon="👨‍💼" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨‍💼</button><button onclick="UIManager.selectParentIcon('👩‍💼')" class="parent-icon-btn" data-icon="👩‍💼" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👩‍💼</button><button onclick="UIManager.selectParentIcon('🧔')" class="parent-icon-btn" data-icon="🧔" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🧔</button><button onclick="UIManager.selectParentIcon('👱‍♀️')" class="parent-icon-btn" data-icon="👱‍♀️" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👱‍♀️</button><button onclick="UIManager.selectParentIcon('🦸')" class="parent-icon-btn" data-icon="🦸" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🦸</button><button onclick="UIManager.selectParentIcon('🦸‍♀️')" class="parent-icon-btn" data-icon="🦸‍♀️" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🦸‍♀️</button>
+                <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:10px;" id="parentIconGrid" onclick="const btn=event.target.closest('.parent-icon-btn');if(btn)UIManager.selectParentIcon(btn.getAttribute('data-icon'))">
+<button class="parent-icon-btn" data-icon="👨‍👩‍👧" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨‍👩‍👧</button><button class="parent-icon-btn" data-icon="👨" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨</button><button class="parent-icon-btn" data-icon="👩" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👩</button><button class="parent-icon-btn" data-icon="👴" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👴</button><button class="parent-icon-btn" data-icon="👵" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👵</button><button class="parent-icon-btn" data-icon="🧑" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🧑</button><button class="parent-icon-btn" data-icon="👨‍💼" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨‍💼</button><button class="parent-icon-btn" data-icon="👩‍💼" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👩‍💼</button><button class="parent-icon-btn" data-icon="🧔" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🧔</button><button class="parent-icon-btn" data-icon="👱‍♀️" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👱‍♀️</button><button class="parent-icon-btn" data-icon="🦸" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🦸</button><button class="parent-icon-btn" data-icon="🦸‍♀️" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🦸‍♀️</button>
 </div>
             </div>
             <div style="margin-bottom:24px;">
@@ -723,9 +760,9 @@ const UIManager = {
     }
     const roleDisplay = document.getElementById('currentRoleDisplay');
     if(roleDisplay){
-      roleDisplay.textContent = '当前：'+(appData.role==='parent'?(appData.settings.parentName||'家长'):'孩子');
+      roleDisplay.textContent = appData.role==='parent'?(appData.settings.parentName||'家长'):'孩子';
       if(appData.role==='parent'){
-        roleDisplay.innerHTML = '当前：'+(appData.settings.parentName||'家长')+' <i class="fas fa-pen" style="font-size:11px;color:var(--accent);cursor:pointer;margin-left:4px;" onclick="UIManager.showEditParentModal()"></i>';
+        roleDisplay.innerHTML = (appData.settings.parentName||'家长')+' <i class="fas fa-pen" style="font-size:11px;color:var(--accent);cursor:pointer;margin-left:4px;" onclick="UIManager.showEditParentModal()"></i>';
       }
     }
   },
@@ -734,16 +771,21 @@ const UIManager = {
     document.getElementById('headerRole').textContent = roleText;
     document.getElementById('headerRole').className = 'role-badge '+(appData.role==='parent'?'role-parent':'role-child');
     document.getElementById('headerName').textContent = appData.role==='parent'?(appData.settings.parentName||'家长'):(appData.children.find(c=>c.id===appData.currentChildId)?.name||'孩子');
-    document.getElementById('headerAvatar').textContent = appData.role==='parent'?(appData.settings.parentIcon||'👨‍👩‍👧'):'🧒';
-    document.getElementById('roleSwitchText').textContent = appData.role==='parent'?'切换孩子':'切换家长';
+    document.getElementById('headerName').style.cursor = appData.role==='parent'?'pointer':'default';
+    document.getElementById('headerAvatar').textContent = appData.role==='parent'?(appData.settings.parentIcon||'👨‍👩‍👧'):(appData.children.find(c=>c.id===appData.currentChildId)?.avatarIcon||'🧒');
+    document.getElementById('headerAvatar').style.cursor = appData.role==='parent'?'pointer':'default';
     const badge = document.getElementById('currentChildBadge');
     if(badge){
-      if(appData.role==='parent' && appData.children.length>0){ badge.style.display='inline-block'; badge.innerHTML='当前：'+(appData.children.find(c=>c.id===appData.currentChildId)?.name||'未选择')+' <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>'; }
+      if(appData.role==='parent' && appData.children.length>0){
+        badge.style.display='inline-block';
+        badge.innerHTML = appData.children.map(c=>`<option value="${c.id}" ${c.id===appData.currentChildId?'selected':''}>${c.name}</option>`).join('');
+        badge.onchange = (e) => { ChildManager.switchChild(e.target.value); };
+      }
       else { badge.style.display='none'; }
     }
     const pn=document.getElementById('profileName'); if(pn) pn.textContent = appData.role==='parent'?(appData.settings.parentName||'家长'):(appData.children.find(c=>c.id===appData.currentChildId)?.name||'孩子');
 
-    const pa=document.getElementById('profileAvatar'); if(pa) pa.textContent = appData.role==='parent'?(appData.settings.parentIcon||'👨‍👩‍👧'):'🧒';
+    const pa=document.getElementById('profileAvatar'); if(pa) pa.textContent = appData.role==='parent'?(appData.settings.parentIcon||'👨‍👩‍👧'):(appData.children.find(c=>c.id===appData.currentChildId)?.avatarIcon||'🧒');
   },
   showModal(id) { const el=document.getElementById(id); if(el){ el.classList.add('active'); el.style.display='flex'; } document.body.style.overflow='hidden'; },
   closeModal(id) { const el=document.getElementById(id); if(el){ el.classList.remove('active'); el.style.display='none'; } document.body.style.overflow=''; },
@@ -780,9 +822,16 @@ const UIManager = {
   },
   selectParentIcon(icon) {
     document.querySelectorAll('.parent-icon-btn').forEach(btn => {
-      btn.classList.toggle('selected', btn.dataset.icon === icon);
-      btn.style.borderColor = btn.dataset.icon === icon ? 'var(--accent)' : 'var(--border-color)';
-      btn.style.background = btn.dataset.icon === icon ? 'var(--accent-light)' : 'var(--bg-card)';
+      const btnIcon = btn.getAttribute('data-icon');
+      const isMatch = btnIcon === icon;
+      btn.classList.toggle('selected', isMatch);
+      if (isMatch) {
+        btn.style.borderColor = 'var(--accent)';
+        btn.style.background = 'var(--accent-light)';
+      } else {
+        btn.style.borderColor = 'var(--border-color)';
+        btn.style.background = 'var(--bg-card)';
+      }
     });
   }
 };
@@ -824,6 +873,7 @@ const TaskManager = {
         }
       }
     } else {
+      this.currentEditId = null; this.groupEditId = null;
       document.getElementById('taskForm').reset(); document.getElementById('taskId').value=''; document.getElementById('taskStars').value='1'; this.selectStar(1);
       const today = new Date().toISOString().split('T')[0]; document.getElementById('taskDeadline').value = today;
     }
@@ -900,24 +950,24 @@ const TaskManager = {
 
     // 新建任务模式
     if (autoSplit && deadline) {
-      // 自动均分每日任务
+      // 自动均分每日任务：前余量天每天 base+1，后面每天 base
       const today = new Date(); today.setHours(0,0,0,0);
       const endDate = new Date(deadline); endDate.setHours(0,0,0,0);
       const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
       if (daysDiff <= 0) { UIManager.showToast('截止日期必须大于今天'); return; }
 
-      const dailyAmount = Math.ceil(amount / daysDiff);
+      const baseAmount = Math.floor(amount / daysDiff);
+      const remainder = amount % daysDiff;
       const groupId = 'g_' + Date.now();
       const baseTask = { subject, title: title || '图片任务', unit, stars: stars, status:'pending', childId, imageData, createdAt:Date.now() };
 
       for (let i = 0; i < daysDiff; i++) {
         const taskDate = new Date(today); taskDate.setDate(today.getDate() + i + 1);
-        const remaining = amount - (dailyAmount * i);
-        const currentDayAmount = i === daysDiff - 1 ? remaining : dailyAmount;
+        const currentDayAmount = baseAmount + (i < remainder ? 1 : 0);
         const task = { ...baseTask, id:'t_'+Date.now()+'_'+i, title: (title ? title + ' ' : '') + '（第'+(i+1)+'天/共'+daysDiff+'天）', amount: currentDayAmount, deadline: taskDate.toISOString().split('T')[0], createdAt: Date.now() + i, groupId };
         appData.tasks.push(task);
       }
-      UIManager.showToast('已创建'+daysDiff+'天任务，每天约'+dailyAmount+unit);
+      UIManager.showToast('已创建'+daysDiff+'天任务，前'+remainder+'天每天'+(baseAmount+1)+unit+'，其余每天'+baseAmount+unit);
     } else {
       // 普通任务（一次性）
       const task = { id:'t_'+Date.now(), subject, title: title || '图片任务', amount, unit, deadline, stars, status:'pending', childId, imageData, createdAt:Date.now() };
@@ -1150,10 +1200,17 @@ const TaskManager = {
 // ==================== ChildManager 孩子管理 ====================
 const ChildManager = {
   currentEditId: null,
-  showAddChildModal() { this.currentEditId=null; document.getElementById('childModalTitle').textContent='添加孩子'; document.getElementById('childForm').reset(); document.getElementById('childEditId').value=''; UIManager.showModal('childModal'); },
-  editChild(id) { this.currentEditId=id; const c=appData.children.find(x=>x.id===id); if(!c) return; document.getElementById('childModalTitle').textContent='编辑孩子'; document.getElementById('childName').value=c.name; document.getElementById('childAge').value=c.age||''; document.getElementById('childGrade').value=c.grade||'一年级'; document.getElementById('childEditId').value=c.id; UIManager.showModal('childModal'); },
+  showAddChildModal() { this.currentEditId=null; document.getElementById('childModalTitle').textContent='添加孩子'; document.getElementById('childForm').reset(); document.getElementById('childEditId').value=''; document.getElementById('childAvatarIcon').value='🧒'; this.selectChildAvatar('🧒'); UIManager.showModal('childModal'); },
+  editChild(id) { this.currentEditId=id; const c=appData.children.find(x=>x.id===id); if(!c) return; document.getElementById('childModalTitle').textContent='编辑孩子'; document.getElementById('childName').value=c.name; document.getElementById('childAge').value=c.age||''; document.getElementById('childGrade').value=c.grade||'一年级'; document.getElementById('childEditId').value=c.id; document.getElementById('childAvatarIcon').value=c.avatarIcon||'🧒'; this.selectChildAvatar(c.avatarIcon||'🧒'); UIManager.showModal('childModal'); },
+  selectChildAvatar(icon) {
+    document.getElementById('childAvatarIcon').value = icon;
+    document.querySelectorAll('.child-avatar-btn').forEach(btn => {
+      if(btn.dataset.icon === icon) { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'var(--accent-light)'; }
+      else { btn.style.borderColor = 'var(--border-color)'; btn.style.background = 'var(--bg-card)'; }
+    });
+  },
   saveChild(e) { e.preventDefault();
-    const child = { id:this.currentEditId||'c_'+Date.now(), name:document.getElementById('childName').value, age:parseInt(document.getElementById('childAge').value)||8, grade:document.getElementById('childGrade').value, stars:0, avatarColor:this.getAvatarColor() };
+    const child = { id:this.currentEditId||'c_'+Date.now(), name:document.getElementById('childName').value, age:parseInt(document.getElementById('childAge').value)||8, grade:document.getElementById('childGrade').value, stars:0, avatarColor:this.getAvatarColor(), avatarIcon:document.getElementById('childAvatarIcon').value||'🧒' };
     if(this.currentEditId){ const idx=appData.children.findIndex(c=>c.id===this.currentEditId); if(idx>-1){ child.stars=appData.children[idx].stars||0; child.avatarColor=appData.children[idx].avatarColor; appData.children[idx]=child; } }
     else { appData.children.push(child); if(!appData.currentChildId) appData.currentChildId=child.id; }
     DataManager.save(); UIManager.closeModal('childModal'); UIManager.renderAll(); ChildManager.renderChildManage(); UIManager.showToast(this.currentEditId?'孩子信息已更新':'孩子已添加');
@@ -1162,12 +1219,26 @@ const ChildManager = {
   renderChildManage() {
     const list = document.getElementById('childManageList');
     if(appData.children.length===0){ list.innerHTML='<div class="empty-state">还没有添加孩子</div>'; return; }
-    list.innerHTML = appData.children.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg-primary);border-radius:12px;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:12px;"><div class="child-avatar" style="background:${c.avatarColor};color:white;">${c.name.charAt(0)}</div><div><div style="font-weight:600;color:var(--text-primary);">${c.name}</div><div style="font-size:12px;color:var(--text-secondary);">${c.grade} | ${c.age}岁 | ⭐${c.stars||0}</div></div></div><div style="display:flex;gap:4px;"><button onclick="ChildManager.switchChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">切换</button><button onclick="ChildManager.editChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;font-size:12px;cursor:pointer;color:var(--text-secondary);">编辑</button><button onclick="ChildManager.removeChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--danger-bg);border:none;border-radius:8px;font-size:12px;cursor:pointer;color:var(--danger);">删除</button></div></div>`).join('');
+    list.innerHTML = appData.children.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg-primary);border-radius:12px;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:12px;"><div class="child-avatar" style="background:${c.avatarColor};color:white;cursor:pointer;" onclick="ChildManager.editChildAvatar('${c.id}')" title="点击编辑头像">${c.avatarIcon||c.name.charAt(0)}</div><div><div style="font-weight:600;color:var(--text-primary);">${c.name}</div><div style="font-size:12px;color:var(--text-secondary);">${c.grade} | ${c.age}岁 | ⭐${c.stars||0}</div></div></div><div style="display:flex;gap:4px;"><button onclick="ChildManager.switchChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">切换</button><button onclick="ChildManager.editChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;font-size:12px;cursor:pointer;color:var(--text-secondary);">编辑</button><button onclick="ChildManager.removeChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--danger-bg);border:none;border-radius:8px;font-size:12px;cursor:pointer;color:var(--danger);">删除</button></div></div>`).join('');
   },
   switchChild(id) { appData.currentChildId=id; appData.currentRewardChildId=id; DataManager.save(); UIManager.renderAll(); App.updateHomeStats(); UIManager.showToast('已切换孩子'); },
 
   removeChild(id) { if(!confirm('确定要删除这个孩子吗？相关任务也会被删除')) return; appData.children=appData.children.filter(c=>c.id!==id); appData.tasks=appData.tasks.filter(t=>t.childId!==id); if(appData.currentChildId===id) appData.currentChildId=appData.children[0]?.id||null; DataManager.save(); UIManager.renderAll(); UIManager.showToast('孩子已删除'); },
-  showParentChildSelector() { if(appData.children.length===0) return; UIManager.showModal('childSwitchModal'); const list=document.getElementById('childSwitchList'); list.innerHTML=appData.children.map(c=>`<div class="child-select-card ${c.id===appData.currentChildId?'selected':''}" onclick="UIManager.closeModal('childSwitchModal');ChildManager.switchChild('${c.id}');"><div class="child-avatar" style="background:${c.avatarColor};color:white;">${c.name.charAt(0)}</div><div><div style="font-weight:600;">${c.name}</div><div style="font-size:12px;color:var(--text-secondary);">${c.grade}</div></div></div>`).join(''); }
+  showParentChildSelector() { if(appData.children.length===0) return; UIManager.showModal('childSwitchModal'); const list=document.getElementById('childSwitchList'); list.innerHTML=appData.children.map(c=>`<div class="child-select-card ${c.id===appData.currentChildId?'selected':''}" onclick="UIManager.closeModal('childSwitchModal');ChildManager.switchChild('${c.id}');"><div class="child-avatar" style="background:${c.avatarColor};color:white;">${c.avatarIcon||c.name.charAt(0)}</div><div><div style="font-weight:600;">${c.name}</div><div style="font-size:12px;color:var(--text-secondary);">${c.grade}</div></div></div>`).join(''); },
+  editChildAvatar(id) { const c=appData.children.find(x=>x.id===id); if(!c) return; UIManager.showModal('childAvatarModal'); this.currentAvatarEditId=id; document.getElementById('childAvatarModalName').textContent=c.name; this.selectChildAvatarModal(c.avatarIcon||'🧒'); },
+  selectChildAvatarModal(icon) {
+    document.getElementById('childAvatarModalSelected').value = icon;
+    document.querySelectorAll('.child-avatar-modal-btn').forEach(btn => {
+      if(btn.dataset.icon === icon) { btn.style.borderColor = 'var(--accent)'; btn.style.background = 'var(--accent-light)'; }
+      else { btn.style.borderColor = 'var(--border-color)'; btn.style.background = 'var(--bg-card)'; }
+    });
+  },
+  saveChildAvatar() {
+    const icon = document.getElementById('childAvatarModalSelected').value;
+    const idx = appData.children.findIndex(c=>c.id===this.currentAvatarEditId);
+    if(idx>-1) { appData.children[idx].avatarIcon = icon; DataManager.save(); UIManager.renderAll(); UIManager.showToast('头像已更新'); }
+    UIManager.closeModal('childAvatarModal');
+  }
 };
 
 // ==================== RewardManager 奖励管理 ====================
