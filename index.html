@@ -288,10 +288,11 @@
                     <span id="todayDate" style="font-size:13px; color:var(--text-secondary);"></span>
                     <button onclick="PosterManager.showPoster()" class="btn" style="background:var(--accent-light); color:var(--accent-text); border:none; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:600; margin-left:8px;"><i class="fas fa-share-alt"></i> 海报</button>
                 </div>
-                <div id="todayStats" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
-                    <div style="text-align:center; padding:12px; background:var(--accent-light); border-radius:12px;"><div id="statTotal" style="font-size:24px; font-weight:bold; color:var(--accent-text);">0</div><div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">今日任务</div></div>
-                    <div style="text-align:center; padding:12px; background:var(--success-bg); border-radius:12px;"><div id="statDone" style="font-size:24px; font-weight:bold; color:var(--success);">0</div><div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">已完成</div></div>
-                    <div style="text-align:center; padding:12px; background:var(--warning-bg); border-radius:12px;"><div id="statPoints" style="font-size:24px; font-weight:bold; color:var(--warning);">0</div><div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">我的星星</div></div>
+                <div id="todayStats" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">
+                    <div style="text-align:center; padding:10px 4px; background:var(--accent-light); border-radius:12px;"><div id="statPending" style="font-size:20px; font-weight:bold; color:var(--accent-text);">0</div><div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">待完成</div></div>
+                    <div style="text-align:center; padding:10px 4px; background:#fef3c7; border-radius:12px;"><div id="statUploaded" style="font-size:20px; font-weight:bold; color:#d97706;">0</div><div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">待批改</div></div>
+                    <div style="text-align:center; padding:10px 4px; background:var(--success-bg); border-radius:12px;"><div id="statApproved" style="font-size:20px; font-weight:bold; color:var(--success);">0</div><div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">已完成</div></div>
+                    <div style="text-align:center; padding:10px 4px; background:#fee2e2; border-radius:12px;"><div id="statRejected" style="font-size:20px; font-weight:bold; color:#dc2626;">0</div><div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">需修改</div></div>
                 </div>
                 <div id="streakSection" style="margin-top:16px; padding:12px; background:var(--warning-bg); border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
                     <span class="streak-flame">🔥</span>
@@ -424,17 +425,8 @@
                         <input type="hidden" id="taskImageData">
                     </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;"><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">总数量</label><input type="number" id="taskAmount" placeholder="20" min="1" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">单位</label><input type="text" id="taskUnit" placeholder="页/道/篇/分钟" value="页" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div></div>
-                <div style="margin-bottom:16px; padding:12px; background:var(--bg-secondary); border-radius:12px;">
-                    <label style="display:flex; align-items:center; cursor:pointer; font-size:14px; color:var(--text-primary);">
-                        <input type="checkbox" id="autoSplitTask" style="margin-right:8px; width:18px; height:18px; accent-color:var(--accent);" onchange="TaskManager.toggleAutoSplit(this)">
-                        <span><strong>自动均分每日任务</strong> — 根据截止日期，将总任务自动分配到每天</span>
-                    </label>
-                    <div id="autoSplitInfo" style="display:none; margin-top:8px; font-size:12px; color:var(--text-secondary); padding-left:26px;">
-                        系统将根据截止日期自动计算每天需要完成的数量
-                    </div>
-                </div>
-                <div style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">截止日期</label><input type="date" id="taskDeadline" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;"><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">每日数量</label><input type="number" id="taskAmount" placeholder="2" min="1" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">单位</label><input type="text" id="taskUnit" placeholder="页/道/篇/分钟" value="页" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;"><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">开始日期</label><input type="date" id="taskStartDate" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">截止日期</label><input type="date" id="taskDeadline" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div></div>
                 <div style="margin-bottom:24px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">奖励星星</label><div style="display:flex; gap:8px; flex-wrap:wrap;"><button type="button" onclick="TaskManager.selectStar(1)" class="star-btn btn" data-star="1" style="padding:8px 16px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:20px; cursor:pointer; font-size:14px; color:var(--text-secondary);">⭐ 1</button><button type="button" onclick="TaskManager.selectStar(2)" class="star-btn btn" data-star="2" style="padding:8px 16px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:20px; cursor:pointer; font-size:14px; color:var(--text-secondary);">⭐ 2</button><button type="button" onclick="TaskManager.selectStar(3)" class="star-btn btn" data-star="3" style="padding:8px 16px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:20px; cursor:pointer; font-size:14px; color:var(--text-secondary);">⭐ 3</button><button type="button" onclick="TaskManager.selectStar(5)" class="star-btn btn" data-star="5" style="padding:8px 16px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:20px; cursor:pointer; font-size:14px; color:var(--text-secondary);">⭐ 5</button></div><input type="hidden" id="taskStars" value="1"></div>
                 <div style="display:flex; gap:12px;"><button type="button" onclick="UIManager.closeModal('taskModal')" class="btn" style="flex:1; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">取消</button><button type="submit" class="btn" style="flex:1; padding:14px; border:none; background:var(--accent); color:white; border-radius:12px; cursor:pointer; font-weight:600;">保存</button></div>
             </form>
@@ -638,15 +630,18 @@ const App = {
     if (!child) return;
     const today = Utils.getTodayString();
     const todayTasks = appData.tasks.filter(t => t.childId === childId && t.deadline && Utils.getLocalDateString(t.deadline) === today);
-    const doneTasks = todayTasks.filter(t => t.status === 'approved').length;
-    const totalTasks = todayTasks.length;
-    const stars = child.stars || 0;
-    const statTotal = document.getElementById('statTotal');
-    const statDone = document.getElementById('statDone');
-    const statPoints = document.getElementById('statPoints');
-    if (statTotal) statTotal.textContent = totalTasks;
-    if (statDone) statDone.textContent = doneTasks;
-    if (statPoints) statPoints.textContent = stars;
+    const pendingCount = todayTasks.filter(t => t.status === 'pending').length;
+    const uploadedCount = todayTasks.filter(t => t.status === 'uploaded').length;
+    const approvedCount = todayTasks.filter(t => t.status === 'approved').length;
+    const rejectedCount = todayTasks.filter(t => t.status === 'rejected').length;
+    const statPending = document.getElementById('statPending');
+    const statUploaded = document.getElementById('statUploaded');
+    const statApproved = document.getElementById('statApproved');
+    const statRejected = document.getElementById('statRejected');
+    if (statPending) statPending.textContent = pendingCount;
+    if (statUploaded) statUploaded.textContent = uploadedCount;
+    if (statApproved) statApproved.textContent = approvedCount;
+    if (statRejected) statRejected.textContent = rejectedCount;
     const streakChildName = document.getElementById('streakChildName');
     if (streakChildName) streakChildName.textContent = child.name || '孩子';
     const streakDays = document.getElementById('streakDays');
@@ -843,39 +838,34 @@ const TaskManager = {
     this.currentEditId = taskId || null;
     this.groupEditId = isGroupEdit ? (appData.tasks.find(t=>t.id===taskId)?.groupId || taskId) : null;
     document.getElementById('taskModalTitle').textContent = isGroupEdit ? '编辑任务组' : (taskId ? '编辑任务' : '新建任务');
-    // 重置输入类型为文字
     this.switchInputType('text');
     document.getElementById('taskImageData').value = '';
     document.getElementById('taskImagePreview').style.display = 'none';
-    document.getElementById('autoSplitTask').checked = false;
-    document.getElementById('autoSplitInfo').style.display = 'none';
     const sel = document.getElementById('taskChildId'); sel.innerHTML = '';
     appData.children.forEach(c => { const o=document.createElement('option'); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
     if(appData.currentChildId) sel.value = appData.currentChildId;
+    const today = Utils.getTodayString();
     if(taskId){
       const t = appData.tasks.find(x=>x.id===taskId);
       if(t){ document.getElementById('taskId').value=t.id; document.getElementById('taskSubject').value=t.subject||'other'; document.getElementById('taskTitle').value=t.title; document.getElementById('taskAmount').value=t.amount||''; document.getElementById('taskUnit').value=t.unit||'页'; document.getElementById('taskDeadline').value=t.deadline||''; document.getElementById('taskStars').value=t.stars||1; if(t.childId) sel.value=t.childId; this.selectStar(t.stars||1); if(t.imageData){ document.getElementById('taskImageData').value=t.imageData; document.getElementById('taskImagePreviewImg').src=t.imageData; document.getElementById('taskImagePreview').style.display='block'; this.switchInputType('image'); } }
       if (this.groupEditId) {
-        const autoCb = document.getElementById('autoSplitTask');
-        if (autoCb) { autoCb.checked = true; this.toggleAutoSplit(autoCb); }
-        const titleInput = document.getElementById('taskTitle');
-        if (titleInput) { titleInput.value = titleInput.value.replace(/\s*（第\d+天\/共\d+天）$/, ''); }
-        // 反推原始总数量和截止日期
         const allGroupTasks = appData.tasks.filter(t => t.groupId === this.groupEditId);
         if (allGroupTasks.length > 0) {
-          const totalAmount = allGroupTasks.reduce((sum, t) => sum + (parseInt(t.amount) || 1), 0);
           const firstTask = allGroupTasks[0];
-          const lastDeadline = allGroupTasks[allGroupTasks.length - 1].deadline;
-          document.getElementById('taskAmount').value = totalAmount;
-          document.getElementById('taskDeadline').value = lastDeadline || '';
+          const lastTask = allGroupTasks[allGroupTasks.length - 1];
+          document.getElementById('taskAmount').value = firstTask.amount || 1;
+          document.getElementById('taskStartDate').value = firstTask.deadline || today;
+          document.getElementById('taskDeadline').value = lastTask.deadline || today;
           document.getElementById('taskStars').value = firstTask.stars || 1;
           this.selectStar(firstTask.stars || 1);
+          const titleInput = document.getElementById('taskTitle');
+          if (titleInput) { titleInput.value = firstTask.title.replace(/（\d{4}-\d{2}-\d{2}）$/, ''); }
         }
       }
     } else {
       this.currentEditId = null; this.groupEditId = null;
       document.getElementById('taskForm').reset(); document.getElementById('taskId').value=''; document.getElementById('taskStars').value='1'; this.selectStar(1);
-      const today = new Date().toISOString().split('T')[0]; document.getElementById('taskDeadline').value = today;
+      document.getElementById('taskStartDate').value = today; document.getElementById('taskDeadline').value = today;
     }
     document.getElementById('taskChildSelect').style.display = appData.role==='parent' && appData.children.length>0 ? 'block':'none';
     UIManager.showModal('taskModal');
@@ -918,10 +908,10 @@ const TaskManager = {
   saveTask(e) { e.preventDefault();
     const title = document.getElementById('taskTitle').value;
     const imageData = document.getElementById('taskImageData').value;
-    const amount = parseInt(document.getElementById('taskAmount').value)||1;
+    const dailyAmount = parseInt(document.getElementById('taskAmount').value)||1;
     const unit = document.getElementById('taskUnit').value||'页';
+    const startDate = document.getElementById('taskStartDate').value;
     const deadline = document.getElementById('taskDeadline').value;
-    const autoSplit = document.getElementById('autoSplitTask').checked;
     const childId = appData.role==='parent'?document.getElementById('taskChildId').value:appData.currentChildId;
     const stars = parseInt(document.getElementById('taskStars').value)||1;
     const subject = document.getElementById('taskSubject').value;
@@ -932,45 +922,41 @@ const TaskManager = {
       if(oldGroup.length>0){ appData.tasks = appData.tasks.filter(t=>t.groupId!==this.groupEditId); }
       else {
         const sample = appData.tasks.find(t=>t.id===this.groupEditId);
-        if(sample){ const m=sample.title.match(/^(.*?)(\s*（第\d+天\/共\d+天）)$/); const base=m?m[1]:sample.title;
+        if(sample){ const m=sample.title.match(/^(.*?)(\s*（\d+\/\d+）)$/); const base=m?m[1]:sample.title;
           appData.tasks = appData.tasks.filter(t=>!(t.title.startsWith(base)&&t.subject===sample.subject&&t.childId===sample.childId));
         }
       }
       this.currentEditId = null; this.groupEditId = null;
-      // 继续执行新建逻辑，用新参数重新生成
     }
 
     // 如果是编辑单条模式，直接更新
     if(this.currentEditId && !this.groupEditId){ 
       const idx=appData.tasks.findIndex(t=>t.id===this.currentEditId); 
-      if(idx>-1) appData.tasks[idx]={...appData.tasks[idx], subject, title, amount, unit, deadline, stars, childId, imageData, id:this.currentEditId}; 
+      if(idx>-1) appData.tasks[idx]={...appData.tasks[idx], subject, title, amount:dailyAmount, unit, deadline, stars, childId, imageData, id:this.currentEditId}; 
       DataManager.save(); UIManager.closeModal('taskModal'); UIManager.renderAll(); UIManager.showToast('任务已更新');
       return;
     }
 
-    // 新建任务模式
-    if (autoSplit && deadline) {
-      // 自动均分每日任务：前余量天每天 base+1，后面每天 base
-      const today = new Date(); today.setHours(0,0,0,0);
-      const endDate = new Date(deadline); endDate.setHours(0,0,0,0);
-      const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
-      if (daysDiff <= 0) { UIManager.showToast('截止日期必须大于今天'); return; }
+    // 新建任务模式：从开始日期到截止日期每天生成一个任务
+    if (startDate && deadline) {
+      const s = new Date(startDate + 'T00:00:00');
+      const e = new Date(deadline + 'T00:00:00');
+      const daysDiff = Math.ceil((e - s) / (1000 * 60 * 60 * 24)) + 1;
+      if (daysDiff <= 0) { UIManager.showToast('截止日期必须大于等于开始日期'); return; }
 
-      const baseAmount = Math.floor(amount / daysDiff);
-      const remainder = amount % daysDiff;
       const groupId = 'g_' + Date.now();
       const baseTask = { subject, title: title || '图片任务', unit, stars: stars, status:'pending', childId, imageData, createdAt:Date.now() };
 
       for (let i = 0; i < daysDiff; i++) {
-        const taskDate = new Date(today); taskDate.setDate(today.getDate() + i + 1);
-        const currentDayAmount = baseAmount + (i < remainder ? 1 : 0);
-        const task = { ...baseTask, id:'t_'+Date.now()+'_'+i, title: (title ? title + ' ' : '') + '（第'+(i+1)+'天/共'+daysDiff+'天）', amount: currentDayAmount, deadline: taskDate.toISOString().split('T')[0], createdAt: Date.now() + i, groupId };
+        const taskDate = new Date(s); taskDate.setDate(s.getDate() + i);
+        const dateStr = taskDate.getFullYear() + '-' + String(taskDate.getMonth()+1).padStart(2,'0') + '-' + String(taskDate.getDate()).padStart(2,'0');
+        const task = { ...baseTask, id:'t_'+Date.now()+'_'+i, title: title + '（' + dateStr + '）', amount: dailyAmount, deadline: dateStr, createdAt: Date.now() + i, groupId };
         appData.tasks.push(task);
       }
-      UIManager.showToast('已创建'+daysDiff+'天任务，前'+remainder+'天每天'+(baseAmount+1)+unit+'，其余每天'+baseAmount+unit);
+      UIManager.showToast('已创建' + daysDiff + '天任务，每天' + dailyAmount + unit);
     } else {
-      // 普通任务（一次性）
-      const task = { id:'t_'+Date.now(), subject, title: title || '图片任务', amount, unit, deadline, stars, status:'pending', childId, imageData, createdAt:Date.now() };
+      // 没有日期范围，只生成一个任务
+      const task = { id:'t_'+Date.now(), subject, title: title || '图片任务', amount: dailyAmount, unit, deadline, stars, status:'pending', childId, imageData, createdAt:Date.now() };
       appData.tasks.push(task);
       UIManager.showToast('任务已创建');
     }
@@ -1081,24 +1067,24 @@ const TaskManager = {
     const subj = SUBJECT_NAMES[t.subject]||'其他'; const icon = SUBJECT_ICONS[t.subject]||'📌';
     const total = g.tasks.length; const done = g.tasks.filter(x=>x.status==='approved').length;
     const pct = total > 0 ? Math.round(done/total*100) : 0;
-    const baseTitle = t.title.replace(/（第\d+天\/共\d+天）$/, '').trim();
+    const firstDate = g.tasks[0].deadline || '';
+    const lastDate = g.tasks[g.tasks.length-1].deadline || '';
+    const dateRange = firstDate && lastDate ? (firstDate === lastDate ? firstDate : firstDate + ' 至 ' + lastDate) : '';
+    const baseTitle = t.title.replace(/（\d{4}-\d{2}-\d{2}）$/, '').trim();
     const groupId = g.groupId || g.tasks[0].id;
-    div.innerHTML = `<div class="task-group-header" onclick="TaskManager.toggleGroupExpand('${groupId}')">
+    div.innerHTML = `<div class="task-group-header">
       <div style="display:flex;align-items:center;gap:10px;flex:1;">
         <span class="badge subject-${t.subject}" style="padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;">${icon} ${subj}</span>
         <div style="flex:1;">
-          <div style="font-weight:600;color:var(--text-primary);font-size:15px;">${baseTitle} <span style="font-size:12px;color:var(--text-secondary);font-weight:400;">(${total}天)</span></div>
+          <div style="font-weight:600;color:var(--text-primary);font-size:15px;">${baseTitle}</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">${dateRange} | 每天${t.amount||1}${t.unit||'页'} | ⭐${t.stars||1}</div>
           <div class="task-group-progress"><div style="width:${pct}%;"></div></div>
           <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">已完成 ${done}/${total} (${pct}%)</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         ${appData.role==='parent'?`<div class="task-group-actions"><button onclick="event.stopPropagation();TaskManager.editTaskGroup('${groupId}')" title="编辑整组" style="color:var(--accent);"><i class="fas fa-pen"></i></button><button onclick="event.stopPropagation();TaskManager.deleteTaskGroup('${groupId}')" title="删除整组" style="color:var(--danger);"><i class="fas fa-trash"></i></button></div>`:''}
-        <i class="fas fa-chevron-down" id="expand-${groupId}" style="color:var(--text-muted);transition:transform 0.3s ease;"></i>
       </div>
-    </div>
-    <div class="task-group-expand" id="group-body-${groupId}">
-      <div>${g.tasks.map((sub,idx)=>`<div class="task-group-subtask" style="background:${idx%2===0?'var(--bg-card)':'var(--bg-primary)'};"><div style="display:flex;align-items:center;gap:10px;"><span class="badge ${'status-'+sub.status}" style="padding:2px 8px;border-radius:10px;font-size:11px;">${STATUS_LABELS[sub.status]}</span><div style="font-size:14px;color:var(--text-primary);">${sub.title}</div></div><div style="font-size:12px;color:var(--text-secondary);">${sub.deadline||'无'} | ${sub.amount||1}${sub.unit||'页'} | ⭐${sub.stars||1}</div></div>`).join('')}</div>
     </div>`;
     return div;
   },
