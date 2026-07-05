@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>暑假自律打卡 - 亲子版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="暑假自律打卡">
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ==================== CSS变量系统 / 主题 ==================== */
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-card: #ffffff;
+            --bg-elevated: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-color: #e5e7eb;
+            --accent: #667eea;
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --accent-light: #e0e7ff;
+            --accent-text: #4338ca;
+            --success: #10b981;
+            --success-bg: #d1fae5;
+            --warning: #f59e0b;
+            --warning-bg: #fef3c7;
+            --danger: #dc2626;
+            --danger-bg: #fee2e2;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --radius-lg: 24px;
+            --nav-height: 64px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.15s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-card: #1e293b;
+            --bg-elevated: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --accent: #818cf8;
+            --accent-gradient: linear-gradient(135deg, #818cf8 0%, #a78bfa 100%);
+            --accent-light: #312e81;
+            --accent-text: #c7d2fe;
+            --success: #34d399;
+            --success-bg: #064e3b;
+            --warning: #fbbf24;
+            --warning-bg: #78350f;
+            --danger: #f87171;
+            --danger-bg: #7f1d1d;
+            --shadow: 0 2px 12px rgba(0,0,0,0.3);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
+        }
+
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0; padding: 0;
+            transition: background 0.3s, color 0.3s;
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 页面切换动画 */
+        .page { display: none; opacity: 0; transform: translateX(20px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .page.active { display: block; opacity: 1; transform: translateX(0); }
+
+        /* 卡片 */
+        .card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); transition: var(--transition); }
+        .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+        /* 按钮微交互 */
+        .btn { transition: var(--transition-fast); position: relative; overflow: hidden; }
+        .btn:active { transform: scale(0.96); }
+
+        /* 科目颜色 */
+        .subject-math { background: #e0e7ff; color: #4338ca; }
+        .subject-chinese { background: #fce7f3; color: #be185d; }
+        .subject-english { background: #dbeafe; color: #1e40af; }
+        .subject-science { background: #d1fae5; color: #065f46; }
+        .subject-reading { background: #ede9fe; color: #6d28d9; }
+        .subject-writing { background: #ffedd5; color: #9a3412; }
+        .subject-sport { background: #ccfbf1; color: #0f766e; }
+        .subject-art { background: #fce7f3; color: #be185d; }
+        .subject-music { background: #e0e7ff; color: #4338ca; }
+        .subject-other { background: #fef3c7; color: #92400e; }
+        [data-theme="dark"] .subject-math { background: #312e81; color: #c7d2fe; }
+        [data-theme="dark"] .subject-chinese { background: #831843; color: #fbcfe8; }
+        [data-theme="dark"] .subject-english { background: #1e3a8a; color: #bfdbfe; }
+        [data-theme="dark"] .subject-science { background: #064e3b; color: #a7f3d0; }
+        [data-theme="dark"] .subject-other { background: #78350f; color: #fde68a; }
+
+        /* 状态标签 */
+        .status-pending { background: var(--warning-bg); color: var(--warning); }
+        .status-uploaded { background: var(--accent-light); color: var(--accent-text); }
+        .status-approved { background: var(--success-bg); color: var(--success); }
+        .status-rejected { background: var(--danger-bg); color: var(--danger); }
+
+        /* 模态框 */
+        .modal-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.5); display: none; opacity: 0; transition: opacity 0.3s ease; align-items: flex-end; justify-content: center; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-panel { background: var(--bg-card); width: 100%; max-height: 85vh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; overflow-y: auto; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1); padding-bottom: calc(24px + var(--safe-bottom)); }
+        .modal-overlay.active .modal-panel { transform: translateY(0); }
+
+        /* 底部导航 */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 8px 0 calc(8px + var(--safe-bottom)); z-index: 40; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: var(--transition); }
+        .nav-item { transition: var(--transition-fast); }
+        .nav-item.active { color: var(--accent); }
+        .nav-item.active i { transform: scale(1.1); }
+
+        /* 骨架屏 */
+        .skeleton { background: linear-gradient(90deg, var(--border-color) 25%, var(--bg-elevated) 50%, var(--border-color) 75%); background-size: 200% 100%; animation: skeleton-loading 1.5s infinite; border-radius: 8px; }
+        @keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Toast */
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #333; color: white; padding: 12px 24px; border-radius: 24px; z-index: 100; transition: 0.3s; opacity: 0; pointer-events: none; font-size: 14px; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* 任务卡片 */
+        .task-card { transition: var(--transition-fast); cursor: pointer; border-bottom: 1px solid var(--border-color); }
+        .task-card:hover { background: var(--bg-primary); }
+        .task-card:active { transform: scale(0.98); }
+
+        /* 连续打卡 */
+        .streak-flame { color: var(--warning); animation: flame-pulse 1.5s infinite; }
+        @keyframes flame-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+        /* 彩带 */
+        .confetti { position: fixed; pointer-events: none; z-index: 99; border-radius: 50%; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+        /* 筛选按钮 */
+        .filter-btn { padding: 6px 14px; border-radius: 20px; border: none; font-size: 13px; cursor: pointer; white-space: nowrap; transition: var(--transition-fast); background: var(--bg-primary); color: var(--text-secondary); }
+        .filter-btn.active { background: var(--accent); color: white; }
+
+        /* 奖励页标签 */
+        .reward-tab-btn { transition: var(--transition-fast); }
+
+        /* 孩子标签 */
+        .child-tab { flex-shrink: 0; text-align: center; cursor: pointer; padding: 8px 14px; border-radius: 12px; transition: var(--transition-fast); background: var(--bg-primary); color: var(--text-secondary); }
+        .child-tab.active { background: var(--accent); color: white; }
+
+        /* 角色徽章 */
+        .role-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .role-parent { background: var(--accent-light); color: var(--accent-text); }
+        .role-child { background: #fce7f3; color: #be185d; }
+        [data-theme="dark"] .role-child { background: #831843; color: #fbcfe8; }
+
+        /* 奖励 */
+        .reward-category { margin-bottom: 20px; }
+        .reward-category-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .reward-item { transition: var(--transition); }
+        .reward-item:active { transform: scale(0.95); }
+
+        /* 孩子选择 */
+        .child-select-card { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-card); border-radius: 12px; cursor: pointer; transition: var(--transition-fast); border: 2px solid transparent; }
+        .child-select-card:hover { border-color: var(--accent); }
+        .child-select-card.selected { border-color: var(--accent); background: var(--accent-light); }
+
+        /* 头像 */
+        .avatar-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        .child-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+
+        /* 文件上传 */
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
+        .file-input-wrapper input[type=file] { position: absolute; left: -9999px; }
+        .custom-file-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border: 2px dashed var(--border-color); border-radius: 12px; color: var(--text-secondary); cursor: pointer; transition: var(--transition-fast); }
+        .custom-file-btn:active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+
+        /* 主题切换 */
+        .theme-toggle { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.2); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; color: white; }
+
+        /* 通知 */
+        .notification-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-120px); background: var(--accent); color: white; padding: 12px 20px; border-radius: 12px; z-index: 101; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: var(--shadow-lg); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+        .notification-toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* 加载 */
+        .spinner { width: 24px; height: 24px; border: 2px solid var(--border-color); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 语音按钮 */
+        .voice-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-light); border: none; color: var(--accent-text); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition-fast); font-size: 14px; }
+        .voice-btn:hover { background: var(--accent); color: white; }
+        .voice-btn.playing { animation: voice-pulse 0.5s infinite alternate; }
+        @keyframes voice-pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        /* 图表 */
+        .chart-line { stroke: var(--accent); stroke-width: 2; fill: none; stroke-linecap: round; }
+        .chart-area { fill: var(--accent-light); opacity: 0.3; }
+        .chart-dot { fill: var(--accent); stroke: var(--bg-card); stroke-width: 2; }
+
+        /* 输入框 */
+        input, select, textarea { font-size: 16px; background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); transition: var(--transition-fast); }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
+        [data-theme="dark"] input:focus, [data-theme="dark"] select:focus, [data-theme="dark"] textarea:focus { box-shadow: 0 0 0 3px rgba(129,140,248,0.2); }
+
+        /* 分组任务卡片 */
+        .task-group-card { background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color); transition: var(--transition); }
+        .task-group-card:hover { border-color: var(--accent); }
+        .task-group-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .task-group-expand { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
+        .task-group-expand.open { grid-template-rows: 1fr; }
+        .task-group-expand > div { overflow: hidden; }
+        .task-group-progress { height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+        .task-group-progress > div { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
+        .task-group-subtask { padding: 10px 16px; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .task-group-subtask:last-child { border-radius: 0 0 var(--radius) var(--radius); }
+        .task-group-actions { display: flex; gap: 8px; }
+        .task-group-actions button { background: none; border: none; cursor: pointer; font-size: 14px; padding: 4px 8px; border-radius: 6px; transition: var(--transition-fast); }
+      </style>
+</head>
+<body>
+    <!-- 主题切换 -->
+
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+    <div id="notificationToast" class="notification-toast"><i class="fas fa-bell"></i> <span id="notificationText">提醒内容</span></div>
+
+    <!-- 角色选择页面 -->
+    <div id="roleSelectPage" class="page active" style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background: var(--accent-gradient);">
+        <div style="text-align:center; color:white; margin-bottom:40px;">
+            <div style="font-size:64px; margin-bottom:16px;">🌟</div>
+            <h1 style="font-size:28px; font-weight:bold; margin-bottom:8px;">暑假自律打卡</h1>
+            <p style="opacity:0.9; font-size:15px;">亲子协作，让暑假更有意义</p>
+        </div>
+        <div style="width:100%; max-width:320px; display:flex; flex-direction:column; gap:16px;">
+            <button onclick="App.selectRole('parent')" class="btn" style="background:white; border:none; border-radius:16px; padding:24px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 20px rgba(0,0,0,0.1); cursor:pointer; width:100%; text-align:left;">
+                <div style="width:56px; height:56px; background:var(--accent-light); border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;">👨‍👩‍👧</div>
+                <div>
+                    <div style="font-size:18px; font-weight:bold; color:var(--text-primary);">我是家长</div>
+                    <div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">布置任务、批改作业、管理孩子</div>
+                </div>
+            </button>
+            <button onclick="App.selectRole('child')" class="btn" style="background:white; border:none; border-radius:16px; padding:24px; display:flex; align-items:center; gap:16px; box-shadow:0 4px 20px rgba(0,0,0,0.1); cursor:pointer; width:100%; text-align:left;">
+                <div style="width:56px; height:56px; background:#fce7f3; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:28px;">🧒</div>
+                <div>
+                    <div style="font-size:18px; font-weight:bold; color:var(--text-primary);">我是孩子</div>
+                    <div style="font-size:14px; color:var(--text-secondary); margin-top:4px;">查看任务、上传作业、获得奖励</div>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 主应用 -->
+    <div id="mainApp" style="display:none;">
+        <!-- 顶部栏 -->
+        <div style="background: var(--accent-gradient); color:white; padding:16px 20px; position:sticky; top:0; z-index:30;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div id="headerAvatar" class="avatar-circle" style="background:rgba(255,255,255,0.2); color:white; font-size:20px; cursor:pointer;" onclick="if(appData.role==='parent')UIManager.showEditParentModal()">👤</div>
+                    <div>
+                        <div id="headerName" style="font-weight:bold; font-size:16px; cursor:pointer;" onclick="if(appData.role==='parent')UIManager.showEditParentModal()">加载中...</div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-top:2px;">
+                            <span id="headerRole" class="role-badge role-parent">家长</span>
+                            <span id="currentChildBadge" style="display:none; background:rgba(255,255,255,0.3); color:white; padding:3px 10px; border-radius:12px; font-size:12px; cursor:pointer;" onclick="ChildManager.showParentChildSelector()">当前：未选择 <i class="fas fa-chevron-down" style="font-size:10px; margin-left:2px;"></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:12px;">
+                    <button onclick="App.showDataSync()" class="btn" style="background:rgba(255,255,255,0.2); border:none; color:white; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="数据同步"><i class="fas fa-sync-alt"></i></button>
+                    <button onclick="App.toggleRole()" id="roleSwitchBtn" class="btn" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:4px;"><i class="fas fa-exchange-alt"></i> <span id="roleSwitchText">切换角色</span></button><button class="theme-toggle" onclick="ThemeManager.toggle()" title="切换主题">🌙</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 首页 -->
+        <div id="pageHome" class="page active" style="padding:16px;">
+            <div class="card" style="padding:20px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h2 style="font-size:18px; font-weight:bold; color:var(--text-primary);">📅 今日概览</h2>
+                    <span id="todayDate" style="font-size:13px; color:var(--text-secondary);"></span>
+                    <button onclick="PosterManager.showPoster()" class="btn" style="background:var(--accent-light); color:var(--accent-text); border:none; padding:6px 12px; border-radius:20px; cursor:pointer; font-size:12px; font-weight:600; margin-left:8px;"><i class="fas fa-share-alt"></i> 海报</button>
+                </div>
+                <div id="todayStats" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+                    <div style="text-align:center; padding:12px; background:var(--accent-light); border-radius:12px;"><div id="statTotal" style="font-size:24px; font-weight:bold; color:var(--accent-text);">0</div><div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">今日任务</div></div>
+                    <div style="text-align:center; padding:12px; background:var(--success-bg); border-radius:12px;"><div id="statDone" style="font-size:24px; font-weight:bold; color:var(--success);">0</div><div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">已完成</div></div>
+                    <div style="text-align:center; padding:12px; background:var(--warning-bg); border-radius:12px;"><div id="statPoints" style="font-size:24px; font-weight:bold; color:var(--warning);">0</div><div style="font-size:12px; color:var(--text-secondary); margin-top:4px;">我的星星</div></div>
+                </div>
+                <div id="streakSection" style="margin-top:16px; padding:12px; background:var(--warning-bg); border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <span class="streak-flame">🔥</span>
+                    <span style="font-weight:600; color:var(--warning);"><span id="streakChildName">孩子</span> 连续打卡 <span id="streakDays">0</span> 天</span>
+                </div>
+            </div>
+
+            <div class="card" style="padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h2 style="font-size:18px; font-weight:bold; color:var(--text-primary);">📝 今日任务</h2>
+                    <button onclick="TaskManager.showTaskModal()" id="addTaskBtn" class="btn" style="background:var(--accent); color:white; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="taskList"></div>
+            </div>
+        </div>
+
+        <!-- 任务页 -->
+        <div id="pageTasks" class="page" style="padding:16px;">
+            <div class="card" style="padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h2 style="font-size:18px; font-weight:bold; color:var(--text-primary);">📋 全部任务</h2>
+                    <button onclick="TaskManager.showTaskModal()" id="addTaskBtn2" class="btn" style="background:var(--accent); color:white; border:none; padding:8px 16px; border-radius:20px; cursor:pointer; font-size:13px; display:flex; align-items:center; gap:6px;"><i class="fas fa-plus" style="font-size:11px;"></i> 新建任务</button>
+                </div>
+                <div id="taskFilter" style="display:flex; gap:8px; margin-bottom:16px; overflow-x:auto;">
+                    <button onclick="TaskManager.filterTasks('all', this)" class="filter-btn active">全部</button>
+                    <button onclick="TaskManager.filterTasks('pending', this)" class="filter-btn">待完成</button>
+                    <button onclick="TaskManager.filterTasks('uploaded', this)" class="filter-btn">待批改</button>
+                    <button onclick="TaskManager.filterTasks('approved', this)" class="filter-btn">已完成</button>
+                    <button onclick="TaskManager.filterTasks('rejected', this)" class="filter-btn">需修改</button>
+                </div>
+                <div id="allTaskList"></div>
+                <div id="taskPagination" style="display:none; justify-content:center; gap:8px; margin-top:16px;"></div>
+            </div>
+        </div>
+
+        <!-- 奖励页 -->
+        <div id="pageRewards" class="page" style="padding:16px;">
+            <div class="card" style="padding:20px; margin-bottom:16px;">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <h2 style="font-size:18px; font-weight:bold; color:var(--text-primary);">⭐ <span id="rewardChildName">我的</span>星星</h2>
+                        <p style="font-size:13px; color:var(--text-secondary); margin-top:4px;">完成任务获得星星，兑换奖励</p>
+                    </div>
+                    <div style="text-align:center;"><div id="totalStars" style="font-size:36px; font-weight:bold; color:var(--warning);">0</div><div style="font-size:12px; color:var(--text-secondary);">颗星星</div></div>
+                </div>
+
+            </div>
+
+            <div class="card" style="padding:20px; margin-bottom:16px;">
+                <h3 style="font-size:16px; font-weight:bold; color:var(--text-primary); margin-bottom:16px;">🏅 勋章墙</h3>
+                <div id="medalList" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px;"></div>
+            </div>
+
+            <div class="card" style="padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <div style="display:flex; gap:8px;">
+                        <button onclick="RewardManager.switchRewardTab('list')" id="rewardTabList" class="reward-tab-btn active" style="padding:8px 16px; border-radius:20px; border:none; font-size:14px; font-weight:600; cursor:pointer; background:var(--accent); color:white;">奖励清单</button>
+                        <button onclick="RewardManager.switchRewardTab('history')" id="rewardTabHistory" class="reward-tab-btn" style="padding:8px 16px; border-radius:20px; border:none; font-size:14px; font-weight:600; cursor:pointer; background:var(--bg-primary); color:var(--text-secondary);">兑换记录</button>
+                    </div>
+                    <button onclick="RewardManager.showRewardManageModal()" id="rewardManageBtn" class="btn" style="background:var(--accent); color:white; border:none; padding:6px 14px; border-radius:20px; cursor:pointer; font-size:13px;"><i class="fas fa-cog" style="vertical-align:middle; margin-right:4px; position:relative; top:2px;"></i> 管理奖励</button>
+                </div>
+                <div id="rewardList"></div>
+            </div>
+        </div>
+
+        <!-- 我的页面 -->
+        <div id="pageProfile" class="page" style="padding:16px;">
+                        <div id="childManageSection" class="card" style="padding:20px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h3 style="font-size:16px; font-weight:bold; color:var(--text-primary);">👨‍👩‍👧‍👦 孩子管理</h3>
+                    <button onclick="ChildManager.showAddChildModal()" class="btn" style="background:var(--accent); color:white; border:none; padding:6px 14px; border-radius:20px; cursor:pointer; font-size:13px;"><i class="fas fa-plus"></i> 添加孩子</button>
+                </div>
+                <div id="childManageList"></div>
+            </div>
+
+            <div class="card" style="padding:20px; margin-bottom:16px;">
+                <h3 style="font-size:16px; font-weight:bold; color:var(--text-primary); margin-bottom:16px;">📊 数据统计</h3>
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:8px;">月度趋势</div>
+                    <div id="monthTrendChart" style="height:120px; position:relative;"></div>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <div style="font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:8px;">科目分布</div>
+                    <div id="subjectPieChart" style="height:120px; display:flex; align-items:center; justify-content:center; gap:20px;"></div>
+                </div>
+                <div>
+                    <div style="font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:8px;">本周完成</div>
+                    <div id="weekStats" style="display:flex; justify-content:space-around; align-items:flex-end; height:120px; gap:8px;"></div>
+                </div>
+            </div>
+
+            <div class="card" id="dataManageSection" style="padding:20px;">
+                <h3 style="font-size:16px; font-weight:bold; color:var(--text-primary); margin-bottom:16px;">💾 数据管理</h3>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    <button onclick="DataManager.exportData()" class="btn" style="padding:12px; background:var(--accent-light); border:1px solid var(--accent-light); border-radius:12px; cursor:pointer; display:flex; align-items:center; gap:12px; color:var(--accent-text);"><i class="fas fa-download"></i> 导出数据备份</button>
+                    <div class="file-input-wrapper" style="width:100%;"><input type="file" id="importFile" accept=".json" onchange="DataManager.importData(this)"><label for="importFile" class="custom-file-btn" style="width:100%;"><i class="fas fa-upload"></i> 导入数据恢复</label></div>
+                    <button onclick="DataManager.clearAllData()" class="btn" style="padding:12px; background:var(--danger-bg); border:1px solid var(--danger-bg); border-radius:12px; cursor:pointer; display:flex; align-items:center; gap:12px; color:var(--danger);"><i class="fas fa-trash-alt"></i> 清空所有数据</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航 -->
+        <div class="bottom-nav">
+            <button onclick="UIManager.showPage('home')" class="nav-item active btn" data-page="home" style="flex:1; background:none; border:none; padding:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-muted); font-size:12px;"><i class="fas fa-home" style="font-size:20px; transition:0.2s;"></i> 首页</button>
+            <button onclick="UIManager.showPage('tasks')" class="nav-item btn" data-page="tasks" style="flex:1; background:none; border:none; padding:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-muted); font-size:12px;"><i class="fas fa-tasks" style="font-size:20px; transition:0.2s;"></i> 任务</button>
+            <button onclick="UIManager.showPage('rewards')" class="nav-item btn" data-page="rewards" style="flex:1; background:none; border:none; padding:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-muted); font-size:12px;"><i class="fas fa-gift" style="font-size:20px; transition:0.2s;"></i> 奖励</button>
+            <button onclick="UIManager.showPage('profile')" class="nav-item btn" data-page="profile" style="flex:1; background:none; border:none; padding:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; color:var(--text-muted); font-size:12px;"><i class="fas fa-user" style="font-size:20px; transition:0.2s;"></i> 我的</button>
+        </div>
+    </div>
+
+    <!-- 任务模态框 -->
+    <div id="taskModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 id="taskModalTitle" style="font-size:20px; font-weight:bold; color:var(--text-primary);">新建任务</h3><button onclick="UIManager.closeModal('taskModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div>
+            <form id="taskForm" onsubmit="TaskManager.saveTask(event)">
+                <input type="hidden" id="taskId">
+                <div id="taskChildSelect" style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">选择孩子</label><select id="taskChildId" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></select></div>
+                <div style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">科目</label><select id="taskSubject" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"><option value="math">数学</option><option value="chinese">语文</option><option value="english">英语</option><option value="science">科学</option><option value="reading">阅读</option><option value="writing">写作</option><option value="sport">运动</option><option value="art">美术</option><option value="music">音乐</option><option value="other">其他</option></select></div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">任务内容</label>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <button type="button" onclick="TaskManager.switchInputType('text')" id="textInputBtn" style="flex:1; padding:8px; border:2px solid var(--accent); background:var(--accent); color:white; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">📝 文字</button>
+                        <button type="button" onclick="TaskManager.switchInputType('image')" id="imageInputBtn" style="flex:1; padding:8px; border:2px solid var(--border-color); background:var(--bg-card); color:var(--text-secondary); border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">📷 图片</button>
+                    </div>
+                    <input type="text" id="taskTitle" placeholder="例如：完成暑假作业第10页" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);">
+                    <div id="taskImageArea" style="display:none; margin-top:8px;">
+                        <input type="file" id="taskImageInput" accept="image/*" capture="camera" style="display:none;" onchange="TaskManager.handleTaskImage(this)">
+                        <button type="button" onclick="document.getElementById('taskImageInput').click()" style="width:100%; padding:12px; border:2px dashed var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; color:var(--text-secondary); font-size:14px;">📷 拍照或选择图片</button>
+                        <div id="taskImagePreview" style="margin-top:8px; display:none;"><img id="taskImagePreviewImg" style="max-width:100%; border-radius:8px; max-height:200px; object-fit:cover;"><button type="button" onclick="TaskManager.clearTaskImage()" style="margin-top:4px; padding:4px 8px; background:#fee2e2; color:#dc2626; border:none; border-radius:6px; font-size:12px; cursor:pointer;">删除图片</button></div>
+                        <input type="hidden" id="taskImageData">
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;"><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">总数量</label><input type="number" id="taskAmount" placeholder="20" min="1" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">单位</label><input type="text" id="taskUnit" placeholder="页/道/篇/分钟" value="页" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div></div>
+                <div style="margin-bottom:16px; padding:12px; background:var(--bg-secondary); border-radius:12px;">
+                    <label style="display:flex; align-items:center; cursor:pointer; font-size:14px; color:var(--text-primary);">
+                        <input type="checkbox" id="autoSplitTask" style="margin-right:8px; width:18px; height:18px; accent-color:var(--accent);" onchange="TaskManager.toggleAutoSplit(this)">
+                        <span><strong>自动均分每日任务</strong> — 根据截止日期，将总任务自动分配到每天</span>
+                    </label>
+                    <div id="autoSplitInfo" style="display:none; margin-top:8px; font-size:12px; color:var(--text-secondary); padding-left:26px;">
+                        系统将根据截止日期自动计算每天需要完成的数量
+                    </div>
+                </div>
+                <div style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">截止日期</label><input type="date" id="taskDeadline" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div>
+                <div style="margin-bottom:24px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">奖励星星</label><div style="display:flex; gap:8px; flex-wrap:wrap;"><button type="button" onclick="TaskManager.selectStar(1)" class="star-btn btn" data-star="1" style="padding:8px 16px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:20px; cursor:pointer; font-size:14px; color:var(--text-secondary);">⭐ 1</button><button type="button" onclick="TaskManager.selectStar(2)" class="star-btn btn" data-star="2" style="padding:8px 16px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:20px; cursor:pointer; font-size:14px; color:var(--text-secondary);">⭐ 2</button><button type="button" onclick="TaskManager.selectStar(3)" class="star-btn btn" data-star="3" style="padding:8px 16px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:20px; cursor:pointer; font-size:14px; color:var(--text-secondary);">⭐ 3</button><button type="button" onclick="TaskManager.selectStar(5)" class="star-btn btn" data-star="5" style="padding:8px 16px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:20px; cursor:pointer; font-size:14px; color:var(--text-secondary);">⭐ 5</button></div><input type="hidden" id="taskStars" value="1"></div>
+                <div style="display:flex; gap:12px;"><button type="button" onclick="UIManager.closeModal('taskModal')" class="btn" style="flex:1; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">取消</button><button type="submit" class="btn" style="flex:1; padding:14px; border:none; background:var(--accent); color:white; border-radius:12px; cursor:pointer; font-weight:600;">保存</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 孩子模态框 -->
+    <div id="childModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 id="childModalTitle" style="font-size:20px; font-weight:bold; color:var(--text-primary);">添加孩子</h3><button onclick="UIManager.closeModal('childModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div>
+            <form id="childForm" onsubmit="ChildManager.saveChild(event)">
+                <input type="hidden" id="childEditId">
+                <div style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">姓名</label><input type="text" id="childName" placeholder="孩子姓名" required style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;"><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">年龄</label><input type="number" id="childAge" placeholder="8" min="1" max="18" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">年级</label><select id="childGrade" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"><option value="幼儿园">幼儿园</option><option value="一年级">一年级</option><option value="二年级">二年级</option><option value="三年级">三年级</option><option value="四年级">四年级</option><option value="五年级">五年级</option><option value="六年级">六年级</option><option value="初一">初一</option><option value="初二">初二</option><option value="初三">初三</option><option value="高一">高一</option><option value="高二">高二</option><option value="高三">高三</option></select></div></div>
+                <div style="display:flex; gap:12px;"><button type="button" onclick="UIManager.closeModal('childModal')" class="btn" style="flex:1; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">取消</button><button type="submit" class="btn" style="flex:1; padding:14px; border:none; background:var(--accent); color:white; border-radius:12px; cursor:pointer; font-weight:600;">保存</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 上传作业 -->
+    <div id="uploadModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">📸 上传作业</h3><button onclick="UIManager.closeModal('uploadModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div>
+            <div id="uploadTaskInfo" style="margin-bottom:16px; padding:12px; background:var(--accent-light); border-radius:12px;"></div>
+            <div style="margin-bottom:16px;"><div class="file-input-wrapper" style="width:100%;"><input type="file" id="homeworkPhoto" accept="image/*" capture="environment" onchange="TaskManager.previewPhoto(this)"><label for="homeworkPhoto" class="custom-file-btn" style="width:100%; padding:40px 20px;"><div style="text-align:center;"><i class="fas fa-camera" style="font-size:32px; margin-bottom:8px; display:block; color:var(--text-muted);"></i><div style="color:var(--text-secondary);">点击拍照或选择图片</div><div style="font-size:12px; color:var(--text-muted); margin-top:4px;">支持 JPG、PNG 格式</div></div></label></div></div>
+            <div id="photoPreviewContainer" style="margin-bottom:16px; display:none;"><img id="photoPreview" class="photo-preview" style="display:block; width:100%; height:200px; object-fit:cover; border-radius:12px;"><button onclick="TaskManager.clearPhoto()" class="btn" style="margin-top:8px; background:var(--danger-bg); border:none; color:var(--danger); padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px;"><i class="fas fa-trash"></i> 重新选择</button></div>
+            <div style="margin-bottom:24px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">备注（可选）</label><textarea id="uploadComment" placeholder="写点什么..." rows="3" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary); resize:none;"></textarea></div>
+            <div style="display:flex; gap:12px;"><button onclick="UIManager.closeModal('uploadModal')" class="btn" style="flex:1; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">取消</button><button onclick="TaskManager.submitHomework()" id="submitHwBtn" class="btn" style="flex:1; padding:14px; border:none; background:var(--accent); color:white; border-radius:12px; cursor:pointer; font-weight:600;">提交作业</button></div>
+        </div>
+    </div>
+
+    <!-- 批改作业 -->
+    <div id="reviewModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">✅ 批改作业</h3><button onclick="UIManager.closeModal('reviewModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div>
+            <div id="reviewTaskInfo" style="margin-bottom:16px; padding:12px; background:var(--accent-light); border-radius:12px;"></div>
+            <div id="reviewPhotoContainer" style="margin-bottom:16px; display:none;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">提交的作业照片</label><img id="reviewPhoto" class="photo-preview" style="display:block; width:100%; height:200px; object-fit:cover; border-radius:12px;"></div>
+            <div id="reviewCommentDisplay" style="margin-bottom:16px; padding:12px; background:var(--bg-primary); border-radius:12px; display:none;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:4px;">孩子备注</label><div id="reviewCommentText" style="color:var(--text-secondary); font-size:14px;"></div></div>
+            <div style="margin-bottom:24px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">批改意见</label><textarea id="reviewComment" placeholder="写得不错！/ 还需要再检查一下第3题..." rows="3" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary); resize:none;"></textarea></div>
+            <div style="display:flex; gap:12px;"><button onclick="TaskManager.reviewTask('rejected')" class="btn" style="flex:1; padding:14px; border:none; background:var(--danger-bg); color:var(--danger); border-radius:12px; cursor:pointer; font-weight:600;"><i class="fas fa-times"></i> 需修改</button><button onclick="TaskManager.reviewTask('approved')" class="btn" style="flex:1; padding:14px; border:none; background:var(--success-bg); color:var(--success); border-radius:12px; cursor:pointer; font-weight:600;"><i class="fas fa-check"></i> 通过</button></div>
+        </div>
+    </div>
+
+    <!-- 数据同步 -->
+    <div id="syncModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">🔄 多设备同步</h3><button onclick="UIManager.closeModal('syncModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div>
+            <div style="margin-bottom:20px;">
+                <p style="color:var(--text-secondary); font-size:14px; line-height:1.6; margin-bottom:16px;">在多台设备间同步数据（如家长手机和孩子手机）：</p>
+                <div style="background:var(--accent-light); border-radius:12px; padding:16px; margin-bottom:16px;"><div style="font-weight:600; color:var(--accent-text); margin-bottom:8px;">📤 发送数据</div><p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">在一台设备上点击"生成分享码"，复制生成的代码</p><button onclick="DataManager.generateShareCode()" class="btn" style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600;"><i class="fas fa-qrcode"></i> 生成分享码</button><div id="shareCodeDisplay" style="margin-top:12px; display:none;"><div style="background:var(--bg-card); border:2px dashed var(--accent); border-radius:12px; padding:16px; text-align:center;"><div id="shareCode" style="font-size:24px; font-weight:bold; color:var(--accent); letter-spacing:4px; font-family:monospace;"></div><p style="font-size:12px; color:var(--text-secondary); margin-top:8px;">有效期10分钟，请尽快在另一台设备输入</p></div><button onclick="DataManager.copyShareCode()" class="btn" style="width:100%; margin-top:8px; padding:10px; background:var(--accent-light); color:var(--accent-text); border:none; border-radius:8px; cursor:pointer; font-size:13px;"><i class="fas fa-copy"></i> 复制分享码</button></div></div>
+                <div style="background:var(--success-bg); border-radius:12px; padding:16px;"><div style="font-weight:600; color:var(--success); margin-bottom:8px;">📥 接收数据</div><p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">在另一台设备上输入分享码，即可同步数据</p><input type="text" id="inputShareCode" placeholder="输入分享码" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; margin-bottom:12px; text-align:center; font-size:18px; letter-spacing:4px; font-family:monospace; background:var(--bg-card); color:var(--text-primary);"><button onclick="DataManager.receiveShareCode()" class="btn" style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600;"><i class="fas fa-download"></i> 同步数据</button></div>
+            </div>
+            <div style="background:var(--warning-bg); border-radius:12px; padding:12px; margin-bottom:16px;"><p style="font-size:12px; color:var(--warning); line-height:1.5;"><i class="fas fa-lightbulb"></i> 提示：分享码包含所有任务、孩子信息和奖励数据。每次同步会覆盖当前设备数据，请谨慎操作。</p></div>
+            <button onclick="UIManager.closeModal('syncModal')" class="btn" style="width:100%; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">关闭</button>
+        </div>
+    </div>
+
+    <!-- 任务详情 -->
+    <div id="taskDetailModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">任务详情</h3><button onclick="UIManager.closeModal('taskDetailModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div><div id="taskDetailContent"></div></div>
+    </div>
+
+    <!-- 奖励管理 -->
+    <div id="rewardManageModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">🎁 奖励管理</h3><button onclick="UIManager.closeModal('rewardManageModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div><div id="manageRewardChildSelector" style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:8px;">选择要管理奖励的孩子</label><div id="manageRewardChildList" style="display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;"></div></div><div id="rewardManageContent"><p style="color:var(--text-secondary); font-size:14px; margin-bottom:16px;">管理当前孩子的奖励项目：</p><div id="rewardManageList" style="display:flex; flex-direction:column; gap:12px;"></div><div style="margin-top:20px; padding:16px; background:var(--accent-light); border-radius:12px;"><h4 style="font-size:14px; font-weight:600; color:var(--accent-text); margin-bottom:12px;">➕ 添加自定义奖励</h4><div style="display:flex; gap:8px; margin-bottom:12px;"><input type="text" id="newRewardName" placeholder="奖励名称，如：去公园" style="flex:1; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-card); color:var(--text-primary);"><input type="number" id="newRewardPoints" placeholder="星星数" min="1" style="width:80px; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-card); color:var(--text-primary);"></div><div style="display:flex; gap:8px; margin-bottom:12px;"><select id="newRewardType" style="flex:1; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-card); color:var(--text-primary);"><option value="food">🍔 美食</option><option value="play">🎮 玩乐</option><option value="book">📚 书籍</option><option value="other">🎁 其他</option></select><input type="hidden" id="newRewardIcon" value="🎁">
+                    <div style="margin-top:12px;"><label style="display:block; font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:8px;">选择图标</label><div style="display:grid; grid-template-columns:repeat(8, 1fr); gap:8px;"><button type="button" onclick="RewardManager.selectRewardIcon('🎮')" class="reward-icon-btn" data-icon="🎮" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎮</button><button type="button" onclick="RewardManager.selectRewardIcon('📚')" class="reward-icon-btn" data-icon="📚" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">📚</button><button type="button" onclick="RewardManager.selectRewardIcon('🎨')" class="reward-icon-btn" data-icon="🎨" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎨</button><button type="button" onclick="RewardManager.selectRewardIcon('🎬')" class="reward-icon-btn" data-icon="🎬" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎬</button><button type="button" onclick="RewardManager.selectRewardIcon('🍦')" class="reward-icon-btn" data-icon="🍦" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🍦</button><button type="button" onclick="RewardManager.selectRewardIcon('🍕')" class="reward-icon-btn" data-icon="🍕" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🍕</button><button type="button" onclick="RewardManager.selectRewardIcon('🎤')" class="reward-icon-btn" data-icon="🎤" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎤</button><button type="button" onclick="RewardManager.selectRewardIcon('🎯')" class="reward-icon-btn" data-icon="🎯" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎯</button><button type="button" onclick="RewardManager.selectRewardIcon('🧩')" class="reward-icon-btn" data-icon="🧩" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🧩</button><button type="button" onclick="RewardManager.selectRewardIcon('🚲')" class="reward-icon-btn" data-icon="🚲" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🚲</button><button type="button" onclick="RewardManager.selectRewardIcon('🎵')" class="reward-icon-btn" data-icon="🎵" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎵</button><button type="button" onclick="RewardManager.selectRewardIcon('🎳')" class="reward-icon-btn" data-icon="🎳" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎳</button><button type="button" onclick="RewardManager.selectRewardIcon('🏀')" class="reward-icon-btn" data-icon="🏀" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🏀</button><button type="button" onclick="RewardManager.selectRewardIcon('🎹')" class="reward-icon-btn" data-icon="🎹" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎹</button><button type="button" onclick="RewardManager.selectRewardIcon('🎣')" class="reward-icon-btn" data-icon="🎣" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🎣</button><button type="button" onclick="RewardManager.selectRewardIcon('🏊')" class="reward-icon-btn" data-icon="🏊" style="padding:8px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:8px; cursor:pointer; font-size:24px; text-align:center;">🏊</button></div></div></div><button onclick="RewardManager.addCustomReward()" class="btn" style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600;"><i class="fas fa-plus"></i> 添加奖励</button></div></div></div>
+    </div>
+
+    <!-- 编辑奖励 -->
+    <div id="rewardEditModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">✏️ 编辑奖励</h3><button onclick="UIManager.closeModal('rewardEditModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div><div id="rewardEditContent"><input type="hidden" id="editRewardId"><div style="margin-bottom:16px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">奖励名称</label><input type="text" id="editRewardName" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;"><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">所需星星</label><input type="number" id="editRewardPoints" min="1" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"></div><div><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">图标</label><input type="text" id="editRewardIcon" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary); text-align:center;"></div></div><div style="margin-bottom:24px;"><label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">分类</label><select id="editRewardType" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary);"><option value="food">🍔 美食</option><option value="play">🎮 玩乐</option><option value="book">📚 书籍</option><option value="other">🎁 其他</option></select></div><div style="display:flex; gap:12px;"><button onclick="UIManager.closeModal('rewardEditModal')" class="btn" style="flex:1; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">取消</button><button onclick="RewardManager.saveRewardEdit()" class="btn" style="flex:1; padding:14px; border:none; background:var(--accent); color:white; border-radius:12px; cursor:pointer; font-weight:600;">保存修改</button></div></div></div>
+    </div>
+
+    <!-- 切换孩子 -->
+    <div id="childSwitchModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">👶 选择孩子</h3><button onclick="UIManager.closeModal('childSwitchModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div><p style="color:var(--text-secondary); font-size:14px; margin-bottom:16px;">请选择要切换到的孩子：</p><div id="childSwitchList" style="display:flex; flex-direction:column; gap:12px;"></div></div>
+    </div>
+
+
+    <!-- 编辑家长信息 -->
+    <div id="parentEditModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">&#9999; 编辑家长信息</h3><button onclick="UIManager.closeModal('parentEditModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">&#215;</button></div>
+            <div style="margin-bottom:20px;">
+                <label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:8px;">选择图标</label>
+                <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:10px;" id="parentIconGrid">
+<button onclick="UIManager.selectParentIcon('👨‍👩‍👧')" class="parent-icon-btn" data-icon="👨‍👩‍👧" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨‍👩‍👧</button><button onclick="UIManager.selectParentIcon('👨')" class="parent-icon-btn" data-icon="👨" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨</button><button onclick="UIManager.selectParentIcon('👩')" class="parent-icon-btn" data-icon="👩" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👩</button><button onclick="UIManager.selectParentIcon('👴')" class="parent-icon-btn" data-icon="👴" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👴</button><button onclick="UIManager.selectParentIcon('👵')" class="parent-icon-btn" data-icon="👵" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👵</button><button onclick="UIManager.selectParentIcon('🧑')" class="parent-icon-btn" data-icon="🧑" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🧑</button><button onclick="UIManager.selectParentIcon('👨‍💼')" class="parent-icon-btn" data-icon="👨‍💼" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👨‍💼</button><button onclick="UIManager.selectParentIcon('👩‍💼')" class="parent-icon-btn" data-icon="👩‍💼" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👩‍💼</button><button onclick="UIManager.selectParentIcon('🧔')" class="parent-icon-btn" data-icon="🧔" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🧔</button><button onclick="UIManager.selectParentIcon('👱‍♀️')" class="parent-icon-btn" data-icon="👱‍♀️" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">👱‍♀️</button><button onclick="UIManager.selectParentIcon('🦸')" class="parent-icon-btn" data-icon="🦸" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🦸</button><button onclick="UIManager.selectParentIcon('🦸‍♀️')" class="parent-icon-btn" data-icon="🦸‍♀️" style="padding:10px; border:2px solid var(--border-color); background:var(--bg-card); border-radius:10px; cursor:pointer; font-size:24px; text-align:center;">🦸‍♀️</button>
+</div>
+            </div>
+            <div style="margin-bottom:24px;">
+                <label style="display:block; font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">家长名称</label>
+                <input type="text" id="editParentName" placeholder="输入名称" style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:12px; background:var(--bg-card); color:var(--text-primary); font-size:16px;">
+            </div>
+            <div style="display:flex; gap:12px;"><button onclick="UIManager.closeModal('parentEditModal')" class="btn" style="flex:1; padding:14px; border:1px solid var(--border-color); background:var(--bg-card); border-radius:12px; cursor:pointer; font-weight:600; color:var(--text-secondary);">取消</button><button onclick="UIManager.saveParentInfo()" class="btn" style="flex:1; padding:14px; border:none; background:var(--accent); color:white; border-radius:12px; cursor:pointer; font-weight:600;">保存</button></div>
+        </div>
+    </div>
+    <!-- 打卡海报 -->
+    <div id="posterModal" class="modal-overlay">
+        <div class="modal-panel" style="padding:24px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;"><h3 style="font-size:20px; font-weight:bold; color:var(--text-primary);">📸 打卡海报</h3><button onclick="UIManager.closeModal('posterModal')" class="btn" style="background:none; border:none; font-size:24px; color:var(--text-muted); cursor:pointer; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:50%;">×</button></div><div id="posterContainer" style="display:flex; flex-direction:column; align-items:center; gap:16px;"><canvas id="posterCanvas" style="max-width:100%; border-radius:16px; box-shadow:var(--shadow-lg);"></canvas><button onclick="PosterManager.downloadPoster()" class="btn" style="padding:14px; background:var(--accent); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600; width:100%;"><i class="fas fa-download"></i> 保存海报到相册</button></div></div>
+    </div>
+
+<script>
+/* ==================== 暑假自律打卡_亲子版 v18 优化版 ====================
+ * 优化内容：CSS变量主题、图片压缩、模块化JS、海报生成、语音播报、增强统计、性能优化
+ */
+
+// ==================== 常量配置 ====================
+const STORAGE_KEY = 'summer_checkin_v18';
+const MAX_IMG_WIDTH = 800;
+const IMG_QUALITY = 0.7;
+const PAGE_SIZE = 20;
+const SUBJECT_NAMES = { math:'数学', chinese:'语文', english:'英语', science:'科学', reading:'阅读', writing:'写作', sport:'运动', art:'美术', music:'音乐', other:'其他' };
+const SUBJECT_ICONS = { math:'🔢', chinese:'📖', english:'🔤', science:'🔬', reading:'📚', writing:'✍️', sport:'🏃', art:'🎨', music:'🎵', other:'📌' };
+const STATUS_LABELS = { pending:'待完成', uploaded:'待批改', approved:'已完成', rejected:'需修改' };
+const ENCOURAGEMENTS = ['太棒了！继续保持！','你真厉害！','又完成一个，加油！','好样的！','坚持就是胜利！','为你骄傲！'];
+
+const DEFAULT_MEDALS = [
+  { id:'m1', name:'初出茅庐', icon:'🌱', desc:'完成首个任务', condition:'first_task', earned:false },
+  { id:'m2', name:'小有所成', icon:'🌿', desc:'累计完成10个任务', condition:'tasks_10', earned:false },
+  { id:'m3', name:'勤学苦练', icon:'📚', desc:'累计完成50个任务', condition:'tasks_50', earned:false },
+  { id:'m4', name:'打卡达人', icon:'🔥', desc:'连续打卡7天', condition:'streak_7', earned:false },
+  { id:'m5', name:'坚持不懈', icon:'💪', desc:'连续打卡30天', condition:'streak_30', earned:false },
+  { id:'m6', name:'全能选手', icon:'⭐', desc:'完成所有科目任务', condition:'all_subjects', earned:false },
+  { id:'m7', name:'星星收藏家', icon:'🌟', desc:'累计获得100颗星星', condition:'stars_100', earned:false },
+  { id:'m8', name:'完美主义者', icon:'💯', desc:'获得一次满分评价', condition:'perfect', earned:false }
+];
+
+const DEFAULT_REWARDS = [
+  { id:'r1', name:'看一集动画片', points:5, icon:'📺', type:'play' },
+  { id:'r2', name:'吃一个冰淇淋', points:8, icon:'🍦', type:'food' },
+  { id:'r3', name:'去公园玩', points:15, icon:'🎡', type:'play' },
+  { id:'r4', name:'买一本新书', points:20, icon:'📖', type:'book' },
+  { id:'r5', name:'周末去游乐园', points:50, icon:'🎢', type:'play' }
+];
+
+// ==================== 全局状态 ====================
+let appData = null;
+let currentUploadTaskId = null;
+let currentReviewTaskId = null;
+let currentFilter = 'all';
+let currentPage = 1;
+let photoBlobUrl = null;
+
+// ==================== App 主控 ====================
+const App = {
+  init() {
+    DataManager.load();
+    ThemeManager.init();
+    StatsManager.initCharts();
+    if (appData.role) { this.showMain(); } else { this.showRoleSelect(); }
+    this.updateTodayDate();
+    NotificationManager.init();
+  },
+  showRoleSelect() { UIManager.showPageEl('roleSelectPage'); document.getElementById('mainApp').style.display='none'; },
+  showMain() { document.getElementById('roleSelectPage').classList.remove('active'); document.getElementById('mainApp').style.display='block'; UIManager.renderAll(); this.updateHomeStats(); },
+  updateHomeStats() {
+    const childId = appData.currentChildId;
+    if (!childId) return;
+    const child = appData.children.find(c => c.id === childId);
+    if (!child) return;
+    const today = Utils.getTodayString();
+    const todayTasks = appData.tasks.filter(t => t.childId === childId && t.deadline && Utils.getLocalDateString(t.deadline) === today);
+    const doneTasks = todayTasks.filter(t => t.status === 'approved').length;
+    const totalTasks = todayTasks.length;
+    const stars = child.stars || 0;
+    const statTotal = document.getElementById('statTotal');
+    const statDone = document.getElementById('statDone');
+    const statPoints = document.getElementById('statPoints');
+    if (statTotal) statTotal.textContent = totalTasks;
+    if (statDone) statDone.textContent = doneTasks;
+    if (statPoints) statPoints.textContent = stars;
+    const streakChildName = document.getElementById('streakChildName');
+    if (streakChildName) streakChildName.textContent = child.name || '孩子';
+    const streakDays = document.getElementById('streakDays');
+    if (streakDays) streakDays.textContent = StatsManager.getStreak(childId);
+  },
+  selectRole(role) {
+    appData.role = role;
+    if (role === 'parent') { appData.settings = appData.settings || {}; appData.settings.parentName = appData.settings.parentName || '家长'; appData.settings.parentIcon = appData.settings.parentIcon || '👨‍👩‍👧'; }
+    DataManager.save();
+    this.showMain();
+    UIManager.showToast(role === 'parent' ? '已切换至家长模式' : '已切换至孩子模式');
+  },
+  toggleRole() { this.switchToRole(appData.role === 'parent' ? 'child' : 'parent'); },
+  switchToRole(role) {
+    appData.role = role;
+    DataManager.save();
+    UIManager.renderAll();
+    UIManager.showToast(role === 'parent' ? '已切换至家长模式' : '已切换至孩子模式');
+  },
+  showDataSync() { UIManager.showModal('syncModal'); document.getElementById('shareCodeDisplay').style.display='none'; },
+  updateTodayDate() { document.getElementById('todayDate').textContent = new Date().toLocaleDateString('zh-CN', {month:'long', day:'numeric', weekday:'short'}); }
+};
+
+// ==================== DataManager 数据管理 ====================
+const DataManager = {
+  load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) { appData = JSON.parse(raw); this.migrate(); }
+      else { this.reset(); }
+    } catch(e) { this.reset(); }
+    this.ensureChildSelected();
+  },
+  save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); } catch(e) { UIManager.showToast('存储空间不足，请导出备份后清理数据'); } },
+  reset() {
+    appData = { role:null, currentChildId:null, currentRewardChildId:null, children:[], tasks:[], medals:JSON.parse(JSON.stringify(DEFAULT_MEDALS)), rewards:JSON.parse(JSON.stringify(DEFAULT_REWARDS)), exchangeHistory:[], settings:{parentName:'家长', parentIcon:'👨‍👩‍👧', theme:'light', reminderEnabled:false, reminderTime:'09:00'}, version:'18' };
+  },
+  migrate() {
+    appData.medals = appData.medals || JSON.parse(JSON.stringify(DEFAULT_MEDALS));
+    appData.rewards = appData.rewards || JSON.parse(JSON.stringify(DEFAULT_REWARDS));
+    appData.exchangeHistory = appData.exchangeHistory || [];
+    appData.settings = appData.settings || {parentName:'家长', parentIcon:'👨‍👩‍👧', theme:'light', reminderEnabled:false, reminderTime:'09:00'}; appData.settings.parentIcon = appData.settings.parentIcon || '👨‍👩‍👧';
+    appData.version = '18';
+  },
+  ensureChildSelected() {
+    if (!appData.currentChildId && appData.children.length > 0) appData.currentChildId = appData.children[0].id;
+  },
+  exportData() {
+    const blob = new Blob([JSON.stringify(appData, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='暑假自律打卡备份_'+new Date().toLocaleDateString()+'.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    UIManager.showToast('数据已导出');
+  },
+  importData(input) {
+    const file = input.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if(confirm('导入将覆盖当前所有数据，确定要继续吗？')) { appData=data; this.migrate(); this.ensureChildSelected(); this.save(); UIManager.renderAll(); UIManager.showToast('数据恢复成功'); }
+      } catch(err) { UIManager.showToast('文件格式错误'); }
+    }; reader.readAsText(file); input.value='';
+  },
+  clearAllData() {
+    if(!confirm('确定要清空所有数据吗？此操作不可恢复！')) return;
+    if(!confirm('再次确认：将删除所有任务、孩子信息和奖励记录？')) return;
+    localStorage.removeItem(STORAGE_KEY); this.reset(); this.save(); UIManager.showToast('数据已清空'); App.showRoleSelect();
+  },
+  generateShareCode() {
+    const code = btoa(JSON.stringify(appData)).replace(/[^a-zA-Z0-9]/g,'').substring(0,24).toUpperCase();
+    document.getElementById('shareCode').textContent = code.match(/.{4}/g).join('-');
+    document.getElementById('shareCodeDisplay').style.display = 'block';
+  },
+  copyShareCode() {
+    const code = document.getElementById('shareCode').textContent;
+    navigator.clipboard.writeText(code).then(()=>UIManager.showToast('已复制到剪贴板')).catch(()=>UIManager.showToast('复制失败'));
+  },
+  receiveShareCode() {
+    UIManager.showToast('同步功能开发中'); UIManager.closeModal('syncModal');
+  },
+  checkStorageSize() {
+    let total = 0;
+    for (let key in localStorage) { if (localStorage.hasOwnProperty(key)) total += localStorage[key].length * 2; }
+    if (total > 4 * 1024 * 1024) { UIManager.showToast('存储空间紧张，建议导出备份'); return false; }
+    return true;
+  }
+};
+
+// ==================== UIManager UI管理 ====================
+const UIManager = {
+  showPage(page) {
+    document.querySelectorAll('.page').forEach(p => { if(p.id !== 'roleSelectPage') p.classList.remove('active'); });
+    document.getElementById('page'+page.charAt(0).toUpperCase()+page.slice(1)).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page===page));
+    this.renderAll();
+  },
+  showPageEl(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); },
+  renderAll() {
+    this.renderHeader(); App.updateHomeStats(); TaskManager.renderTaskList(); TaskManager.renderAllTasks(); RewardManager.renderRewards(); RewardManager.renderMedals();
+    ChildManager.renderChildManage(); StatsManager.renderStats();
+    document.getElementById('addTaskBtn').style.display = appData.role==='parent'?'flex':'none';
+    document.getElementById('addTaskBtn2').style.display = appData.role==='parent'?'flex':'none';
+    document.getElementById('rewardManageBtn').style.display = appData.role==='parent'?'flex':'none';
+    document.getElementById('childManageSection').style.display = appData.role==='parent'?'block':'none';
+    const dm = document.getElementById('dataManageSection'); if(dm) dm.style.display = appData.role==='parent'?'block':'none';
+    const sp = document.getElementById('switchParentBtn'), sc = document.getElementById('switchChildBtn');
+    if(appData.role==='parent'){ sp.style.borderColor='var(--accent)'; sp.style.background='var(--accent)'; sp.style.color='white'; sc.style.borderColor='var(--border-color)'; sc.style.background='var(--bg-card)'; sc.style.color='var(--text-secondary)'; }
+    else { sc.style.borderColor='var(--accent)'; sc.style.background='var(--accent)'; sc.style.color='white'; sp.style.borderColor='var(--border-color)'; sp.style.background='var(--bg-card)'; sp.style.color='var(--text-secondary)'; }
+    document.getElementById('currentRoleDisplay').textContent = '当前：'+(appData.role==='parent'?(appData.settings.parentName||'家长'):'孩子');
+    const roleDisplay = document.getElementById('currentRoleDisplay');
+    if(appData.role==='parent' && roleDisplay) {
+      roleDisplay.innerHTML = '当前：'+(appData.settings.parentName||'家长')+' <i class="fas fa-pen" style="font-size:11px;color:var(--accent);cursor:pointer;margin-left:4px;" onclick="UIManager.showEditParentNameModal()"></i>';
+    }
+  },
+  renderHeader() {
+    const roleText = appData.role==='parent'?'家长':'孩子';
+    document.getElementById('headerRole').textContent = roleText;
+    document.getElementById('headerRole').className = 'role-badge '+(appData.role==='parent'?'role-parent':'role-child');
+    document.getElementById('headerName').textContent = appData.role==='parent'?(appData.settings.parentName||'家长'):(appData.children.find(c=>c.id===appData.currentChildId)?.name||'孩子');
+    document.getElementById('headerAvatar').textContent = appData.role==='parent'?(appData.settings.parentIcon||'👨‍👩‍👧'):'🧒';
+    document.getElementById('roleSwitchText').textContent = appData.role==='parent'?'切换孩子':'切换家长';
+    const badge = document.getElementById('currentChildBadge');
+    if(appData.role==='parent' && appData.children.length>0){ badge.style.display='inline-block'; badge.innerHTML='当前：'+(appData.children.find(c=>c.id===appData.currentChildId)?.name||'未选择')+' <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px;"></i>'; }
+    else { badge.style.display='none'; }
+    const pn=document.getElementById('profileName'); if(pn) pn.textContent = appData.role==='parent'?(appData.settings.parentName||'家长'):(appData.children.find(c=>c.id===appData.currentChildId)?.name||'孩子');
+
+    const pa=document.getElementById('profileAvatar'); if(pa) pa.textContent = appData.role==='parent'?(appData.settings.parentIcon||'👨‍👩‍👧'):'🧒';
+  },
+  showModal(id) { const el=document.getElementById(id); if(el){ el.classList.add('active'); el.style.display='flex'; } document.body.style.overflow='hidden'; },
+  closeModal(id) { const el=document.getElementById(id); if(el){ el.classList.remove('active'); el.style.display='none'; } document.body.style.overflow=''; },
+  showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); },
+  showNotification(msg) { const t=document.getElementById('notificationToast'); document.getElementById('notificationText').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4000); },
+  createConfetti() {
+    const colors = ['#667eea','#f59e0b','#10b981','#ec4899','#8b5cf6'];
+    for(let i=0;i<30;i++){
+      const c=document.createElement('div'); c.className='confetti';
+      c.style.cssText=`left:${Math.random()*100}vw;top:-10px;width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation:fall ${1.5+Math.random()*2}s linear forwards;`;
+      document.body.appendChild(c); setTimeout(()=>c.remove(),4000);
+    }
+  },
+  showEditParentModal() {
+    const modal = document.getElementById('parentEditModal');
+    if (!modal) return;
+    document.getElementById('editParentName').value = appData.settings.parentName || '家长';
+    const currentIcon = appData.settings.parentIcon || '&#128107;';
+    this.selectParentIcon(currentIcon);
+    UIManager.showModal('parentEditModal');
+  },
+  saveParentInfo() {
+    const name = document.getElementById('editParentName').value.trim();
+    if (!name) { UIManager.showToast('请输入名称'); return; }
+    appData.settings.parentName = name;
+    const selectedIcon = document.querySelector('.parent-icon-btn.selected');
+    if (selectedIcon) {
+      appData.settings.parentIcon = selectedIcon.dataset.icon;
+    }
+    DataManager.save();
+    UIManager.closeModal('parentEditModal');
+    UIManager.renderHeader();
+    UIManager.showToast('家长信息已更新');
+  },
+  selectParentIcon(icon) {
+    document.querySelectorAll('.parent-icon-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.icon === icon);
+      btn.style.borderColor = btn.dataset.icon === icon ? 'var(--accent)' : 'var(--border-color)';
+      btn.style.background = btn.dataset.icon === icon ? 'var(--accent-light)' : 'var(--bg-card)';
+    });
+  }
+};
+
+// ==================== TaskManager 任务管理 ====================
+const TaskManager = {
+  currentEditId: null,
+  showTaskModal(taskId, isGroupEdit) {
+    this.currentEditId = taskId || null;
+    this.groupEditId = isGroupEdit ? (appData.tasks.find(t=>t.id===taskId)?.groupId || taskId) : null;
+    document.getElementById('taskModalTitle').textContent = isGroupEdit ? '编辑任务组' : (taskId ? '编辑任务' : '新建任务');
+    // 重置输入类型为文字
+    this.switchInputType('text');
+    document.getElementById('taskImageData').value = '';
+    document.getElementById('taskImagePreview').style.display = 'none';
+    document.getElementById('autoSplitTask').checked = false;
+    document.getElementById('autoSplitInfo').style.display = 'none';
+    const sel = document.getElementById('taskChildId'); sel.innerHTML = '';
+    appData.children.forEach(c => { const o=document.createElement('option'); o.value=c.id; o.textContent=c.name; sel.appendChild(o); });
+    if(appData.currentChildId) sel.value = appData.currentChildId;
+    if(taskId){
+      const t = appData.tasks.find(x=>x.id===taskId);
+      if(t){ document.getElementById('taskId').value=t.id; document.getElementById('taskSubject').value=t.subject||'other'; document.getElementById('taskTitle').value=t.title; document.getElementById('taskAmount').value=t.amount||''; document.getElementById('taskUnit').value=t.unit||'页'; document.getElementById('taskDeadline').value=t.deadline||''; document.getElementById('taskStars').value=t.stars||1; if(t.childId) sel.value=t.childId; this.selectStar(t.stars||1); if(t.imageData){ document.getElementById('taskImageData').value=t.imageData; document.getElementById('taskImagePreviewImg').src=t.imageData; document.getElementById('taskImagePreview').style.display='block'; this.switchInputType('image'); } }
+      if (this.groupEditId) {
+        // 编辑任务组时，默认勾选自动均分，并去掉标题中的天数后缀
+        const autoCb = document.getElementById('autoSplitTask');
+        if (autoCb) { autoCb.checked = true; this.toggleAutoSplit(autoCb); }
+        const titleInput = document.getElementById('taskTitle');
+        if (titleInput) { titleInput.value = titleInput.value.replace(/\s*（第\d+天\/共\d+天）$/, ''); }
+      }
+    } else {
+      document.getElementById('taskForm').reset(); document.getElementById('taskId').value=''; document.getElementById('taskStars').value='1'; this.selectStar(1);
+      const today = new Date().toISOString().split('T')[0]; document.getElementById('taskDeadline').value = today;
+    }
+    document.getElementById('taskChildSelect').style.display = appData.role==='parent' && appData.children.length>0 ? 'block':'none';
+    UIManager.showModal('taskModal');
+  },
+  selectStar(n) { document.getElementById('taskStars').value=n; document.querySelectorAll('.star-btn').forEach(b=>{ b.style.borderColor=b.dataset.star==n?'var(--accent)':'var(--border-color)'; b.style.background=b.dataset.star==n?'var(--accent-light)':'var(--bg-card)'; b.style.color=b.dataset.star==n?'var(--accent-text)':'var(--text-secondary)'; }); },
+  switchInputType(type) {
+    const textInput = document.getElementById('taskTitle');
+    const imageSection = document.getElementById('taskImageArea');
+    const textBtn = document.getElementById('textInputBtn');
+    const imageBtn = document.getElementById('imageInputBtn');
+    if (type === 'text') {
+      if (textInput) textInput.style.display = 'block';
+      if (imageSection) imageSection.style.display = 'none';
+      if (textBtn) { textBtn.style.borderColor = 'var(--accent)'; textBtn.style.background = 'var(--accent)'; textBtn.style.color = 'white'; }
+      if (imageBtn) { imageBtn.style.borderColor = 'var(--border-color)'; imageBtn.style.background = 'var(--bg-card)'; imageBtn.style.color = 'var(--text-secondary)'; }
+    } else {
+      if (textInput) textInput.style.display = 'none';
+      if (imageSection) imageSection.style.display = 'block';
+      if (imageBtn) { imageBtn.style.borderColor = 'var(--accent)'; imageBtn.style.background = 'var(--accent)'; imageBtn.style.color = 'white'; }
+      if (textBtn) { textBtn.style.borderColor = 'var(--border-color)'; textBtn.style.background = 'var(--bg-card)'; textBtn.style.color = 'var(--text-secondary)'; }
+    }
+  },
+  toggleAutoSplit(checkbox) {
+    document.getElementById('autoSplitInfo').style.display = checkbox.checked ? 'block' : 'none';
+  },
+  handleTaskImage(input) {
+    const file = input.files[0];
+    if (!file) return;
+    ImageCompressor.compress(file).then(({dataUrl}) => {
+      document.getElementById('taskImageData').value = dataUrl;
+      document.getElementById('taskImagePreviewImg').src = dataUrl;
+      document.getElementById('taskImagePreview').style.display = 'block';
+    }).catch(() => UIManager.showToast('图片处理失败'));
+  },
+  clearTaskImage() {
+    document.getElementById('taskImageInput').value = '';
+    document.getElementById('taskImageData').value = '';
+    document.getElementById('taskImagePreview').style.display = 'none';
+  },
+  saveTask(e) { e.preventDefault();
+    const title = document.getElementById('taskTitle').value;
+    const imageData = document.getElementById('taskImageData').value;
+    const amount = parseInt(document.getElementById('taskAmount').value)||1;
+    const unit = document.getElementById('taskUnit').value||'页';
+    const deadline = document.getElementById('taskDeadline').value;
+    const autoSplit = document.getElementById('autoSplitTask').checked;
+    const childId = appData.role==='parent'?document.getElementById('taskChildId').value:appData.currentChildId;
+    const stars = parseInt(document.getElementById('taskStars').value)||1;
+    const subject = document.getElementById('taskSubject').value;
+
+    // 如果是编辑任务组模式，先删除旧组
+    if(this.groupEditId){
+      const oldGroup = appData.tasks.filter(t=>t.groupId===this.groupEditId);
+      if(oldGroup.length>0){ appData.tasks = appData.tasks.filter(t=>t.groupId!==this.groupEditId); }
+      else {
+        const sample = appData.tasks.find(t=>t.id===this.groupEditId);
+        if(sample){ const m=sample.title.match(/^(.*?)(\s*（第\d+天\/共\d+天）)$/); const base=m?m[1]:sample.title;
+          appData.tasks = appData.tasks.filter(t=>!(t.title.startsWith(base)&&t.subject===sample.subject&&t.childId===sample.childId));
+        }
+      }
+      this.currentEditId = null; this.groupEditId = null;
+      // 继续执行新建逻辑，用新参数重新生成
+    }
+
+    // 如果是编辑单条模式，直接更新
+    if(this.currentEditId && !this.groupEditId){ 
+      const idx=appData.tasks.findIndex(t=>t.id===this.currentEditId); 
+      if(idx>-1) appData.tasks[idx]={...appData.tasks[idx], subject, title, amount, unit, deadline, stars, childId, imageData, id:this.currentEditId}; 
+      DataManager.save(); UIManager.closeModal('taskModal'); UIManager.renderAll(); UIManager.showToast('任务已更新');
+      return;
+    }
+
+    // 新建任务模式
+    if (autoSplit && deadline) {
+      // 自动均分每日任务
+      const today = new Date(); today.setHours(0,0,0,0);
+      const endDate = new Date(deadline); endDate.setHours(0,0,0,0);
+      const daysDiff = Math.ceil((endDate - today) / (1000 * 60 * 60 * 24));
+      if (daysDiff <= 0) { UIManager.showToast('截止日期必须大于今天'); return; }
+
+      const dailyAmount = Math.ceil(amount / daysDiff);
+      const groupId = 'g_' + Date.now();
+      const baseTask = { subject, title: title || '图片任务', unit, stars: Math.ceil(stars / daysDiff), status:'pending', childId, imageData, createdAt:Date.now() };
+
+      for (let i = 0; i < daysDiff; i++) {
+        const taskDate = new Date(today); taskDate.setDate(today.getDate() + i + 1);
+        const remaining = amount - (dailyAmount * i);
+        const currentDayAmount = i === daysDiff - 1 ? remaining : dailyAmount;
+        const task = { ...baseTask, id:'t_'+Date.now()+'_'+i, title: (title ? title + ' ' : '') + '（第'+(i+1)+'天/共'+daysDiff+'天）', amount: currentDayAmount, deadline: taskDate.toISOString().split('T')[0], createdAt: Date.now() + i, groupId };
+        appData.tasks.push(task);
+      }
+      UIManager.showToast('已创建'+daysDiff+'天任务，每天约'+dailyAmount+unit);
+    } else {
+      // 普通任务（一次性）
+      const task = { id:'t_'+Date.now(), subject, title: title || '图片任务', amount, unit, deadline, stars, status:'pending', childId, imageData, createdAt:Date.now() };
+      appData.tasks.push(task);
+      UIManager.showToast('任务已创建');
+    }
+    DataManager.save(); UIManager.closeModal('taskModal'); UIManager.renderAll();
+  },
+  deleteTask(id) { if(!confirm('确定要删除这个任务吗？')) return; appData.tasks=appData.tasks.filter(t=>t.id!==id); DataManager.save(); UIManager.renderAll(); UIManager.showToast('任务已删除'); },
+  renderTaskList() {
+    const list = document.getElementById('taskList');
+    const childId = appData.currentChildId;
+    const today = Utils.getTodayString();
+    let tasks = appData.tasks.filter(t=>{
+      // 按当前选择的孩子过滤
+      if(childId && t.childId && t.childId!==childId) return false;
+      // 只显示今日任务：deadline为今天，或已创建但未完成的任务
+      if(t.deadline){ const dl=Utils.getLocalDateString(t.deadline); return dl===today || (dl<today && t.status!=='approved'); }
+      return t.status!=='approved';
+    });
+    tasks = tasks.sort((a,b)=> (a.deadline||'9999')-(b.deadline||'9999'));
+    if(tasks.length===0){ list.innerHTML='<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">🎉</div><div>今天没有待完成的任务</div></div>'; return; }
+    const frag = document.createDocumentFragment();
+    tasks.slice(0,10).forEach(t=>{ frag.appendChild(this.createTaskCard(t)); });
+    list.innerHTML=''; list.appendChild(frag);
+  },
+  renderAllTasks() {
+    const list = document.getElementById('allTaskList');
+    const childId = appData.currentChildId;
+    let tasks = appData.tasks.filter(t=>!childId || !t.childId || t.childId===childId);
+    tasks = Utils.filterTasksByStatus(tasks, currentFilter);
+    if (appData.role === 'parent') {
+      // 家长角色：先合并再分页，避免同一组被拆到不同页
+      const allGroups = this.groupAutoSplitTasks(tasks);
+      const totalPages = Math.ceil(allGroups.length / PAGE_SIZE);
+      if(currentPage>totalPages) currentPage=1;
+      const start=(currentPage-1)*PAGE_SIZE; const pageCards=allGroups.slice(start,start+PAGE_SIZE);
+      if(pageCards.length===0){ list.innerHTML='<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">📋</div><div>暂无任务</div></div>'; }
+      else {
+        const frag=document.createDocumentFragment();
+        pageCards.forEach(g => {
+          if (g.isGroup) frag.appendChild(this.createGroupTaskCard(g));
+          else frag.appendChild(this.createTaskCard(g.task, true));
+        });
+        list.innerHTML=''; list.appendChild(frag);
+      }
+      this.renderPagination(totalPages);
+    } else {
+      // 孩子角色：也按组合并，无编辑删除按钮
+      const allGroups = this.groupAutoSplitTasks(tasks);
+      const totalPages = Math.ceil(allGroups.length / PAGE_SIZE);
+      if(currentPage>totalPages) currentPage=1;
+      const start=(currentPage-1)*PAGE_SIZE; const pageCards=allGroups.slice(start,start+PAGE_SIZE);
+      if(pageCards.length===0){ list.innerHTML='<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">📋</div><div>暂无任务</div></div>'; }
+      else { const frag=document.createDocumentFragment(); pageCards.forEach(g => {
+        if (g.isGroup) frag.appendChild(this.createGroupTaskCard(g));
+        else frag.appendChild(this.createTaskCard(g.task, true));
+      }); list.innerHTML=''; list.appendChild(frag); }
+      this.renderPagination(totalPages);
+    }
+  },
+  createTaskCard(t, showDelete=false) {
+    const div = document.createElement('div'); div.className='task-card'; div.style.cssText='padding:16px;';
+    const subj = SUBJECT_NAMES[t.subject]||'其他'; const icon = SUBJECT_ICONS[t.subject]||'📌';
+    const statusClass = 'status-'+t.status;
+    let actions = '';
+    const today = Utils.getTodayString();
+    const taskDate = t.deadline ? Utils.getLocalDateString(t.deadline) : today;
+    const isToday = taskDate === today;
+    if(appData.role==='child' && t.status==='pending') {
+      if (isToday) {
+        actions = `<button onclick="TaskManager.showUploadModal('${t.id}')" class="btn" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;"><i class="fas fa-camera"></i> 上传</button>`;
+      } else {
+        actions = `<button class="btn" disabled style="padding:6px 12px;background:var(--border-color);color:var(--text-muted);border:none;border-radius:8px;font-size:12px;cursor:not-allowed;opacity:0.6;"><i class="fas fa-camera"></i> 上传</button>`;
+      }
+    }
+    else if(appData.role==='parent' && t.status==='uploaded') actions = `<button onclick="TaskManager.showReviewModal('${t.id}')" class="btn" style="padding:6px 12px;background:var(--success);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;"><i class="fas fa-check"></i> 批改</button>`;
+    else if(t.status==='approved') actions = `<span style="color:var(--success);font-size:13px;"><i class="fas fa-check-circle"></i></span>`;
+    else if(t.status==='rejected') {
+      if (isToday) {
+        actions = `<button onclick="TaskManager.showUploadModal('${t.id}')" class="btn" style="padding:6px 12px;background:var(--danger);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;"><i class="fas fa-redo"></i> 重做</button>`;
+      } else {
+        actions = `<button class="btn" disabled style="padding:6px 12px;background:var(--border-color);color:var(--text-muted);border:none;border-radius:8px;font-size:12px;cursor:not-allowed;opacity:0.6;"><i class="fas fa-redo"></i> 重做</button>`;
+      }
+    }
+    const deleteBtn = showDelete && appData.role==='parent' ? `<button onclick="TaskManager.deleteTask('${t.id}')" class="btn" style="padding:6px;background:none;border:none;color:var(--text-muted);cursor:pointer;margin-left:4px;"><i class="fas fa-trash"></i></button>` : '';
+    div.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:flex-start;"><div style="display:flex;align-items:center;gap:10px;flex:1;"><span class="badge subject-${t.subject}" style="padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;">${icon} ${subj}</span><div style="flex:1;"><div style="font-weight:600;color:var(--text-primary);font-size:15px;">${t.title}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">${t.amount||1}${t.unit||'页'} | ⭐${t.stars||1} | 截止:${t.deadline||'无'}</div></div></div><div style="display:flex;align-items:center;gap:6px;"><span class="badge ${statusClass}">${STATUS_LABELS[t.status]}</span>${actions}${deleteBtn}</div></div>`;
+    return div;
+  },
+  groupAutoSplitTasks(tasks) {
+    // 按 groupId 分组，没有groupId的按标题正则匹配分组
+    const groups = {}; const singles = [];
+    tasks.forEach(t => {
+      if (t.groupId) {
+        if (!groups[t.groupId]) groups[t.groupId] = { isGroup: true, tasks: [], groupId: t.groupId };
+        groups[t.groupId].tasks.push(t);
+      } else {
+        const m = t.title.match(/^(.*?)(\s*（第\d+天\/共\d+天）)$/);
+        if (m) { const base = t.subject + '|' + (t.childId||'') + '|' + m[1]; if (!groups[base]) groups[base] = { isGroup: true, tasks: [], groupId: null }; groups[base].tasks.push(t); }
+        else singles.push(t);
+      }
+    });
+    const result = [];
+    singles.forEach(t => result.push({ isGroup: false, task: t }));
+    Object.values(groups).forEach(g => { g.tasks.sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||'')); result.push(g); });
+    return result;
+  },
+  createGroupTaskCard(g) {
+    const div = document.createElement('div'); div.className = 'task-group-card'; div.style.marginBottom = '12px';
+    const t = g.tasks[0];
+    const subj = SUBJECT_NAMES[t.subject]||'其他'; const icon = SUBJECT_ICONS[t.subject]||'📌';
+    const total = g.tasks.length; const done = g.tasks.filter(x=>x.status==='approved').length;
+    const pct = total > 0 ? Math.round(done/total*100) : 0;
+    const baseTitle = t.title.replace(/（第\d+天\/共\d+天）$/, '').trim();
+    const groupId = g.groupId || g.tasks[0].id;
+    div.innerHTML = `<div class="task-group-header" onclick="TaskManager.toggleGroupExpand('${groupId}')">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;">
+        <span class="badge subject-${t.subject}" style="padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;">${icon} ${subj}</span>
+        <div style="flex:1;">
+          <div style="font-weight:600;color:var(--text-primary);font-size:15px;">${baseTitle} <span style="font-size:12px;color:var(--text-secondary);font-weight:400;">(${total}天)</span></div>
+          <div class="task-group-progress"><div style="width:${pct}%;"></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">已完成 ${done}/${total} (${pct}%)</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${appData.role==='parent'?`<div class="task-group-actions"><button onclick="event.stopPropagation();TaskManager.editTaskGroup('${groupId}')" title="编辑整组" style="color:var(--accent);"><i class="fas fa-pen"></i></button><button onclick="event.stopPropagation();TaskManager.deleteTaskGroup('${groupId}')" title="删除整组" style="color:var(--danger);"><i class="fas fa-trash"></i></button></div>`:''}
+        <i class="fas fa-chevron-down" id="expand-${groupId}" style="color:var(--text-muted);transition:transform 0.3s ease;"></i>
+      </div>
+    </div>
+    <div class="task-group-expand" id="group-body-${groupId}">
+      <div>${g.tasks.map((sub,idx)=>`<div class="task-group-subtask" style="background:${idx%2===0?'var(--bg-card)':'var(--bg-primary)'};"><div style="display:flex;align-items:center;gap:10px;"><span class="badge ${'status-'+sub.status}" style="padding:2px 8px;border-radius:10px;font-size:11px;">${STATUS_LABELS[sub.status]}</span><div style="font-size:14px;color:var(--text-primary);">${sub.title}</div></div><div style="font-size:12px;color:var(--text-secondary);">${sub.deadline||'无'} | ${sub.amount||1}${sub.unit||'页'} | ⭐${sub.stars||1}</div></div>`).join('')}</div>
+    </div>`;
+    return div;
+  },
+  toggleGroupExpand(groupId) {
+    const body = document.getElementById('group-body-' + groupId);
+    const icon = document.getElementById('expand-' + groupId);
+    if (!body || !icon) return;
+    body.classList.toggle('open');
+    icon.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+  },
+  editTaskGroup(groupId) {
+    // 找到该组所有任务
+    const groupTasks = appData.tasks.filter(t => t.groupId === groupId);
+    if (groupTasks.length === 0) {
+      // 兼容无groupId的旧数据，按标题正则匹配
+      const sample = appData.tasks.find(t => t.id === groupId);
+      if (!sample) return;
+      const m = sample.title.match(/^(.*?)(\s*（第\d+天\/共\d+天）)$/);
+      const base = m ? m[1] : sample.title;
+      const baseTasks = appData.tasks.filter(t => t.title.startsWith(base) && t.subject === sample.subject && t.childId === sample.childId);
+      if (baseTasks.length === 0) return;
+      this.showTaskModal(baseTasks[0].id, true);
+    } else {
+      this.showTaskModal(groupTasks[0].id, true);
+    }
+  },
+  deleteTaskGroup(groupId) {
+    const groupTasks = appData.tasks.filter(t => t.groupId === groupId);
+    if (groupTasks.length === 0) {
+      const sample = appData.tasks.find(t => t.id === groupId);
+      if (!sample) return;
+      const m = sample.title.match(/^(.*?)(\s*（第\d+天\/共\d+天）)$/);
+      const base = m ? m[1] : sample.title;
+      const baseTasks = appData.tasks.filter(t => t.title.startsWith(base) && t.subject === sample.subject && t.childId === sample.childId);
+      if (!confirm('确定要删除这组任务吗？共'+baseTasks.length+'天任务将全部删除')) return;
+      appData.tasks = appData.tasks.filter(t => !(t.title.startsWith(base) && t.subject === sample.subject && t.childId === sample.childId));
+    } else {
+      if (!confirm('确定要删除这组任务吗？共'+groupTasks.length+'天任务将全部删除')) return;
+      appData.tasks = appData.tasks.filter(t => t.groupId !== groupId);
+    }
+    DataManager.save(); UIManager.renderAll(); UIManager.showToast('任务组已删除');
+  },
+  renderPagination(total) {
+    const p = document.getElementById('taskPagination');
+    if(total<=1){ p.style.display='none'; return; }
+    p.style.display='flex'; p.innerHTML='';
+    for(let i=1;i<=total;i++){ const b=document.createElement('button'); b.className='btn'; b.textContent=i; b.style.cssText=`padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-size:13px;${i===currentPage?'background:var(--accent);color:white;':'background:var(--bg-primary);color:var(--text-secondary);'}`; b.onclick=()=>{currentPage=i;this.renderAllTasks();}; p.appendChild(b); }
+  },
+  filterTasks(status, btn) { currentFilter=status; currentPage=1; document.querySelectorAll('#taskFilter .filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); this.renderAllTasks(); },
+  showUploadModal(id) { currentUploadTaskId=id; const t=appData.tasks.find(x=>x.id===id); document.getElementById('uploadTaskInfo').innerHTML=`<div style="font-weight:600;color:var(--accent-text);">${t.title}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">${SUBJECT_NAMES[t.subject]} | ${t.amount}${t.unit}</div>`; UIManager.showModal('uploadModal'); this.clearPhoto(); },
+  previewPhoto(input) {
+    const file=input.files[0]; if(!file) return;
+    ImageCompressor.compress(file).then(({dataUrl,thumb})=>{
+      document.getElementById('photoPreview').src=dataUrl; document.getElementById('photoPreviewContainer').style.display='block';
+      photoBlobUrl = dataUrl;
+    }).catch(()=>UIManager.showToast('图片处理失败'));
+  },
+  clearPhoto() { document.getElementById('homeworkPhoto').value=''; document.getElementById('photoPreviewContainer').style.display='none'; photoBlobUrl=null; },
+  submitHomework() {
+    const t = appData.tasks.find(x=>x.id===currentUploadTaskId); if(!t) return;
+    const today = Utils.getTodayString();
+    const taskDate = t.deadline ? Utils.getLocalDateString(t.deadline) : today;
+    if (taskDate !== today) { UIManager.showToast('只能完成当天的任务哦'); return; }
+    t.status='uploaded'; t.photo=photoBlobUrl; t.uploadComment=document.getElementById('uploadComment').value; t.uploadedAt=Date.now();
+    DataManager.save(); UIManager.closeModal('uploadModal'); UIManager.renderAll(); UIManager.showToast('作业已提交，等待家长批改');
+  },
+  showReviewModal(id) { currentReviewTaskId=id; const t=appData.tasks.find(x=>x.id===id); document.getElementById('reviewTaskInfo').innerHTML=`<div style="font-weight:600;color:var(--accent-text);">${t.title}</div>`; const pc=document.getElementById('reviewPhotoContainer'), rp=document.getElementById('reviewPhoto'); if(t.photo){ pc.style.display='block'; rp.src=t.photo; } else { pc.style.display='none'; } const cd=document.getElementById('reviewCommentDisplay'), ct=document.getElementById('reviewCommentText'); if(t.uploadComment){ cd.style.display='block'; ct.textContent=t.uploadComment; } else { cd.style.display='none'; } document.getElementById('reviewComment').value=''; UIManager.showModal('reviewModal'); },
+  reviewTask(result) {
+    const t = appData.tasks.find(x=>x.id===currentReviewTaskId); if(!t) return;
+    const today = Utils.getTodayString();
+    const taskDate = t.deadline ? Utils.getLocalDateString(t.deadline) : today;
+    if (taskDate !== today) { UIManager.showToast('只能批改当天的任务'); return; }
+    if(result==='approved'){
+      t.status='approved'; t.reviewComment=document.getElementById('reviewComment').value;
+      const child = appData.children.find(c=>c.id===t.childId);
+      if(child){ child.stars=(child.stars||0)+(t.stars||1); }
+      UIManager.showToast(`太棒了！获得 ${t.stars||1} 颗星星！`); UIManager.createConfetti();
+      VoiceManager.speak(ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)]);
+      this.checkMedals();
+    } else { t.status='rejected'; t.reviewComment=document.getElementById('reviewComment').value; UIManager.showToast('已退回修改'); }
+    DataManager.save(); UIManager.closeModal('reviewModal'); UIManager.renderAll();
+  },
+  checkMedals() {
+    const child = appData.children.find(c=>c.id===appData.currentChildId); if(!child) return;
+    const done = appData.tasks.filter(t=>t.childId===child.id && t.status==='approved').length;
+    const stars = child.stars||0;
+    const subjects = new Set(appData.tasks.filter(t=>t.childId===child.id && t.status==='approved').map(t=>t.subject));
+    const streak = StatsManager.getStreak(child.id);
+    appData.medals.forEach(m=>{
+      if(m.earned) return;
+      let earned=false;
+      switch(m.condition){ case 'first_task': earned=done>=1; break; case 'tasks_10': earned=done>=10; break; case 'tasks_50': earned=done>=50; break; case 'streak_7': earned=streak>=7; break; case 'streak_30': earned=streak>=30; break; case 'all_subjects': earned=subjects.size>=5; break; case 'stars_100': earned=stars>=100; break; case 'perfect': earned=appData.tasks.some(t=>t.childId===child.id&&t.status==='approved'&&t.stars>=5); break; }
+      if(earned){ m.earned=true; UIManager.showNotification(`🏅 获得勋章：${m.name}！`); }
+    });
+    DataManager.save();
+  }
+};
+
+// ==================== ChildManager 孩子管理 ====================
+const ChildManager = {
+  currentEditId: null,
+  showAddChildModal() { this.currentEditId=null; document.getElementById('childModalTitle').textContent='添加孩子'; document.getElementById('childForm').reset(); document.getElementById('childEditId').value=''; UIManager.showModal('childModal'); },
+  editChild(id) { this.currentEditId=id; const c=appData.children.find(x=>x.id===id); if(!c) return; document.getElementById('childModalTitle').textContent='编辑孩子'; document.getElementById('childName').value=c.name; document.getElementById('childAge').value=c.age||''; document.getElementById('childGrade').value=c.grade||'一年级'; document.getElementById('childEditId').value=c.id; UIManager.showModal('childModal'); },
+  saveChild(e) { e.preventDefault();
+    const child = { id:this.currentEditId||'c_'+Date.now(), name:document.getElementById('childName').value, age:parseInt(document.getElementById('childAge').value)||8, grade:document.getElementById('childGrade').value, stars:0, avatarColor:this.getAvatarColor() };
+    if(this.currentEditId){ const idx=appData.children.findIndex(c=>c.id===this.currentEditId); if(idx>-1){ child.stars=appData.children[idx].stars||0; child.avatarColor=appData.children[idx].avatarColor; appData.children[idx]=child; } }
+    else { appData.children.push(child); if(!appData.currentChildId) appData.currentChildId=child.id; }
+    DataManager.save(); UIManager.closeModal('childModal'); UIManager.renderAll(); ChildManager.renderChildManage(); UIManager.showToast(this.currentEditId?'孩子信息已更新':'孩子已添加');
+  },
+  getAvatarColor() { const colors=['#667eea','#ec4899','#10b981','#f59e0b','#8b5cf6','#06b6d4']; return colors[appData.children.length % colors.length]; },
+  renderChildManage() {
+    const list = document.getElementById('childManageList');
+    if(appData.children.length===0){ list.innerHTML='<div class="empty-state">还没有添加孩子</div>'; return; }
+    list.innerHTML = appData.children.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg-primary);border-radius:12px;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:12px;"><div class="child-avatar" style="background:${c.avatarColor};color:white;">${c.name.charAt(0)}</div><div><div style="font-weight:600;color:var(--text-primary);">${c.name}</div><div style="font-size:12px;color:var(--text-secondary);">${c.grade} | ${c.age}岁 | ⭐${c.stars||0}</div></div></div><div style="display:flex;gap:4px;"><button onclick="ChildManager.switchChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:12px;cursor:pointer;">切换</button><button onclick="ChildManager.editChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;font-size:12px;cursor:pointer;color:var(--text-secondary);">编辑</button><button onclick="ChildManager.removeChild('${c.id}')" class="btn" style="padding:6px 12px;background:var(--danger-bg);border:none;border-radius:8px;font-size:12px;cursor:pointer;color:var(--danger);">删除</button></div></div>`).join('');
+  },
+  switchChild(id) { appData.currentChildId=id; appData.currentRewardChildId=id; DataManager.save(); UIManager.renderAll(); App.updateHomeStats(); UIManager.showToast('已切换孩子'); },
+
+  removeChild(id) { if(!confirm('确定要删除这个孩子吗？相关任务也会被删除')) return; appData.children=appData.children.filter(c=>c.id!==id); appData.tasks=appData.tasks.filter(t=>t.childId!==id); if(appData.currentChildId===id) appData.currentChildId=appData.children[0]?.id||null; DataManager.save(); UIManager.renderAll(); UIManager.showToast('孩子已删除'); },
+  showParentChildSelector() { if(appData.children.length===0) return; UIManager.showModal('childSwitchModal'); const list=document.getElementById('childSwitchList'); list.innerHTML=appData.children.map(c=>`<div class="child-select-card ${c.id===appData.currentChildId?'selected':''}" onclick="UIManager.closeModal('childSwitchModal');ChildManager.switchChild('${c.id}');"><div class="child-avatar" style="background:${c.avatarColor};color:white;">${c.name.charAt(0)}</div><div><div style="font-weight:600;">${c.name}</div><div style="font-size:12px;color:var(--text-secondary);">${c.grade}</div></div></div>`).join(''); }
+};
+
+// ==================== RewardManager 奖励管理 ====================
+const RewardManager = {
+  currentManageChildId: null,
+  currentEditRewardId: null,
+  currentRewardTab: 'list',
+  switchRewardTab(tab) {
+    this.currentRewardTab = tab;
+    const listBtn = document.getElementById('rewardTabList');
+    const histBtn = document.getElementById('rewardTabHistory');
+    if (listBtn) {
+      listBtn.style.background = tab === 'list' ? 'var(--accent)' : 'var(--bg-primary)';
+      listBtn.style.color = tab === 'list' ? 'white' : 'var(--text-secondary)';
+    }
+    if (histBtn) {
+      histBtn.style.background = tab === 'history' ? 'var(--accent)' : 'var(--bg-primary)';
+      histBtn.style.color = tab === 'history' ? 'white' : 'var(--text-secondary)';
+    }
+    this.renderRewards();
+  },
+  renderRewards() {
+    const childId = appData.currentRewardChildId || appData.currentChildId;
+    const child = appData.children.find(c=>c.id===childId);
+    document.getElementById('rewardChildName').textContent = child ? child.name+'的' : '我的';
+    document.getElementById('totalStars').textContent = child ? (child.stars||0) : 0;
+    const list = document.getElementById('rewardList');
+    if (this.currentRewardTab === 'history') {
+      const childId = appData.currentRewardChildId || appData.currentChildId;
+      let history = appData.exchangeHistory.slice().reverse();
+      if (childId) {
+        history = history.filter(h => h.childId === childId);
+      }
+      if (history.length === 0) {
+        list.innerHTML = '<div class="empty-state">还没有兑换记录</div>';
+      } else {
+        list.innerHTML = history.map(h => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-primary);border-radius:12px;margin-bottom:8px;"><div style="display:flex;align-items:center;gap:8px;"><div style="font-weight:600;color:var(--text-primary);">${h.rewardName}</div><div style="font-size:12px;color:var(--text-secondary);">${new Date(h.time).toLocaleDateString()}</div></div><div style="color:var(--warning);font-weight:600;">-${h.points}⭐</div></div>`).join('');
+      }
+      return;
+    }
+    const types = {food:'🍔 美食', play:'🎮 玩乐', book:'📚 书籍', other:'🎁 其他'};
+    let html = '';
+    Object.keys(types).forEach(type=>{
+      const items = appData.rewards.filter(r=>r.type===type);
+      if(items.length===0) return;
+      html += `<div class="reward-category"><div class="reward-category-title">${types[type]}</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">`;
+      items.forEach(r=>{
+        const canAfford = child && (child.stars||0) >= r.points;
+        const exchangeCount = appData.exchangeHistory.filter(e => e.rewardId === r.id && e.childId === child.id).length;
+        let statusHtml = '';
+        if (exchangeCount > 0) {
+          statusHtml = `<span style="font-size:12px;color:#10b981;font-weight:600;">✅ 已兑换${exchangeCount}次</span>`;
+        }
+        if (canAfford) {
+          statusHtml += `<button onclick="event.stopPropagation();RewardManager.exchangeReward('${r.id}')" style="padding:6px 16px;background:#10b981;color:white;border:none;border-radius:20px;font-size:12px;cursor:pointer;font-weight:600;margin-left:4px;">兑换</button>`;
+        } else {
+          const need = r.points - (child.stars||0);
+          statusHtml += `<span style="font-size:12px;color:var(--text-muted);">还需${need}颗星星，加油哦！</span>`;
+        }
+        html += `<div class="reward-item card" style="padding:16px;text-align:center;${canAfford?'':'opacity:0.6;'}" onclick="event.stopPropagation();"><div style="font-size:32px;margin-bottom:8px;">${r.icon}</div><div style="font-weight:600;color:var(--text-primary);font-size:14px;">${r.name}</div><div style="font-size:12px;color:var(--warning);margin-top:4px;font-weight:600;">⭐ ${r.points}</div><div style="margin-top:8px;">${statusHtml}</div></div>`;
+      });
+      html += '</div></div>';
+    });
+    list.innerHTML = html || '<div class="empty-state">暂无奖励项目</div>';
+  },
+  renderMedals() {
+    const list = document.getElementById('medalList');
+    list.innerHTML = appData.medals.map(m=>`<div style="text-align:center;opacity:${m.earned?1:0.35};"><div style="font-size:36px;margin-bottom:4px;filter:${m.earned?'none':'grayscale(100%)'};">${m.icon}</div><div style="font-size:11px;color:var(--text-secondary);font-weight:600;">${m.name}</div></div>`).join('');
+  },
+  exchangeReward(id) {
+    const childId = appData.currentRewardChildId || appData.currentChildId;
+    const child = appData.children.find(c=>c.id===childId); if(!child) return;
+    const r = appData.rewards.find(x=>x.id===id); if(!r) return;
+    // 星星不足判断已移到渲染层，此处不再判断（只有足够的才会显示按钮）
+    if(!confirm(`确定要用 ${r.points} 颗星星兑换「${r.name}」吗？`)) return;
+    child.stars = (child.stars||0) - r.points;
+    appData.exchangeHistory.push({ id:'e_'+Date.now(), rewardId:r.id, rewardName:r.name, points:r.points, childId:child.id, childName:child.name, time:Date.now() });
+    DataManager.save(); UIManager.renderAll(); UIManager.showToast(`成功兑换「${r.name}」！`); UIManager.createConfetti();
+  },
+  showExchangeHistory() {
+    UIManager.showModal('exchangeHistoryModal');
+    const list = document.getElementById('exchangeHistoryContent');
+    const history = appData.exchangeHistory.slice().reverse();
+    if(history.length===0){ list.innerHTML='<div class="empty-state">还没有兑换记录</div>'; return; }
+    list.innerHTML = history.map(h=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-primary);border-radius:12px;margin-bottom:8px;"><div><div style="font-weight:600;color:var(--text-primary);">${h.rewardName}</div><div style="font-size:12px;color:var(--text-secondary);">${h.childName} | ${new Date(h.time).toLocaleDateString()}</div></div><div style="color:var(--warning);font-weight:600;">-${h.points}⭐</div></div>`).join('');
+  },
+  showRewardManageModal() { this.currentManageChildId=appData.currentChildId; UIManager.showModal('rewardManageModal'); this.renderRewardManage(); },
+  renderRewardManage() {
+    const list = document.getElementById('manageRewardChildList');
+    list.innerHTML = appData.children.map(c=>`<div class="child-tab ${c.id===this.currentManageChildId?'active':''}" onclick="RewardManager.currentManageChildId='${c.id}';RewardManager.renderRewardManageList();">${c.name}</div>`).join('');
+    this.renderRewardManageList();
+  },
+  renderRewardManageList() {
+    const list = document.getElementById('rewardManageList');
+    list.innerHTML = appData.rewards.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-primary);border-radius:12px;"><div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">${r.icon}</span><div><div style="font-weight:600;">${r.name}</div><div style="font-size:12px;color:var(--text-secondary);">⭐${r.points}</div></div></div><div style="display:flex;gap:4px;"><button onclick="RewardManager.editReward('${r.id}')" class="btn" style="padding:6px 10px;background:var(--accent-light);border:none;border-radius:6px;cursor:pointer;color:var(--accent-text);font-size:12px;">编辑</button><button onclick="RewardManager.removeReward('${r.id}')" class="btn" style="padding:6px 10px;background:var(--danger-bg);border:none;border-radius:6px;cursor:pointer;color:var(--danger);font-size:12px;">删除</button></div></div>`).join('');
+  },
+  // 选择奖励图标
+  selectRewardIcon(icon) {
+    document.getElementById('newRewardIcon').value = icon;
+    document.querySelectorAll('.reward-icon-btn').forEach(btn => {
+      if (btn.dataset.icon === icon) {
+        btn.style.borderColor = 'var(--accent)';
+        btn.style.background = 'var(--accent-light)';
+      } else {
+        btn.style.borderColor = 'var(--border-color)';
+        btn.style.background = 'var(--bg-card)';
+      }
+    });
+  },
+  addCustomReward() {
+    const name=document.getElementById('newRewardName').value; const points=parseInt(document.getElementById('newRewardPoints').value)||1;
+    const type=document.getElementById('newRewardType').value; const icon=document.getElementById('newRewardIcon').value||'🎁';
+    if(!name){ UIManager.showToast('请输入奖励名称'); return; }
+    appData.rewards.push({ id:'r_'+Date.now(), name, points, icon, type });
+    DataManager.save(); document.getElementById('newRewardName').value=''; document.getElementById('newRewardPoints').value=''; this.renderRewardManageList(); UIManager.showToast('奖励已添加');
+  },
+  editReward(id) { const r=appData.rewards.find(x=>x.id===id); if(!r) return; this.currentEditRewardId=id; document.getElementById('editRewardName').value=r.name; document.getElementById('editRewardPoints').value=r.points; document.getElementById('editRewardIcon').value=r.icon; document.getElementById('editRewardType').value=r.type; UIManager.showModal('rewardEditModal'); },
+  saveRewardEdit() { const r=appData.rewards.find(x=>x.id===this.currentEditRewardId); if(!r) return; r.name=document.getElementById('editRewardName').value; r.points=parseInt(document.getElementById('editRewardPoints').value)||1; r.icon=document.getElementById('editRewardIcon').value; r.type=document.getElementById('editRewardType').value; DataManager.save(); UIManager.closeModal('rewardEditModal'); this.renderRewardManageList(); UIManager.showToast('奖励已更新'); },
+  removeReward(id) { if(!confirm('确定要删除这个奖励吗？')) return; appData.rewards=appData.rewards.filter(r=>r.id!==id); DataManager.save(); this.renderRewardManageList(); UIManager.showToast('奖励已删除'); }
+};
+
+// ==================== StatsManager 统计管理 ====================
+const StatsManager = {
+  getStreak(childId) {
+    const tasks = appData.tasks.filter(t=>t.childId===childId && t.status==='approved').sort((a,b)=>(b.approvedAt||b.uploadedAt||0)-(a.approvedAt||a.uploadedAt||0));
+    if(tasks.length===0) return 0;
+    let streak = 0; let check = new Date(); check.setHours(0,0,0,0);
+    const dates = new Set(tasks.map(t=>Utils.getLocalDateString(t.approvedAt||t.uploadedAt||t.createdAt)));
+    while(true){ const s=Utils.getTodayString(check); if(dates.has(s)){ streak++; check.setDate(check.getDate()-1); } else if(streak===0 && s===Utils.getTodayString() && !dates.has(s)){ check.setDate(check.getDate()-1); } else { break; } }
+    return streak;
+  },
+  renderStats() {
+    const childId = appData.currentChildId; if(!childId) return;
+    // 本周柱状图
+    const weekEl = document.getElementById('weekStats'); const days=['周一','周二','周三','周四','周五','周六','周日'];
+    const today = new Date(); const dow = today.getDay()||7;
+    let html = '';
+    for(let i=1;i<=7;i++){
+      const d = new Date(today); d.setDate(today.getDate()-(dow-i));
+      const ds = Utils.getTodayString(d);
+      const count = appData.tasks.filter(t=>t.childId===childId && t.status==='approved' && Utils.getLocalDateString(t.approvedAt||t.uploadedAt||0)===ds).length;
+      const pct = Math.min(count*20,100);
+      html += `<div style="flex:1;text-align:center;"><div style="height:80px;background:var(--bg-primary);border-radius:8px;position:relative;overflow:hidden;"><div style="position:absolute;bottom:0;left:0;right:0;background:var(--accent);border-radius:8px;transition:height 0.5s ease;height:${pct}%;opacity:0.8;"></div></div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px;">${days[i-1]}</div><div style="font-size:12px;font-weight:600;color:var(--accent);">${count}</div></div>`;
+    }
+    weekEl.innerHTML = html;
+    // 月度趋势
+    this.renderMonthTrend(childId);
+    // 科目分布
+    this.renderSubjectPie(childId);
+  },
+  renderMonthTrend(childId) {
+    const el = document.getElementById('monthTrendChart');
+    const data = []; const labels = [];
+    for(let i=29;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const ds=Utils.getTodayString(d); labels.push(`${d.getMonth()+1}/${d.getDate()}`); const cnt=appData.tasks.filter(t=>t.childId===childId&&t.status==='approved'&&Utils.getLocalDateString(t.approvedAt||t.uploadedAt||0)===ds).length; data.push(cnt); }
+    const max = Math.max(...data,1);
+    let path = ''; const w=el.offsetWidth||300; const h=120; const step=w/(data.length-1);
+    data.forEach((v,i)=>{ const x=i*step; const y=h-(v/max)*h*0.8; path += (i===0?`M${x},${y}`:` L${x},${y}`); });
+    let dots = ''; data.forEach((v,i)=>{ const x=i*step; const y=h-(v/max)*h*0.8; dots += `<circle cx="${x}" cy="${y}" r="3" class="chart-dot" ${v>0?'':'style="display:none;"'}/>`; });
+    let area = path + ` L${w},${h} L0,${h} Z`;
+    el.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs><path d="${area}" fill="url(#areaGrad)"/><path d="${path}" class="chart-line"/>${dots}</svg>`;
+  },
+  renderSubjectPie(childId) {
+    const el = document.getElementById('subjectPieChart');
+    const counts = {}; let total = 0;
+    appData.tasks.filter(t=>t.childId===childId&&t.status==='approved').forEach(t=>{ counts[t.subject]=(counts[t.subject]||0)+1; total++; });
+    if(total===0){ el.innerHTML='<div style="color:var(--text-muted);font-size:13px;">暂无数据</div>'; return; }
+    const colors = {math:'#667eea',chinese:'#ec4899',english:'#3b82f6',science:'#10b981',reading:'#8b5cf6',writing:'#f59e0b',sport:'#06b6d4',art:'#f472b6',music:'#6366f1',other:'#9ca3af'};
+    let deg = 0; let grads = ''; let legend = '';
+    Object.entries(counts).forEach(([subj,cnt])=>{ const pct=cnt/total; const degSize=pct*360; const color=colors[subj]||'#9ca3af'; grads += `${color} ${deg}deg ${deg+degSize}deg,`; deg+=degSize; legend += `<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-secondary);"><div style="width:8px;height:8px;border-radius:50%;background:${color};"></div>${SUBJECT_NAMES[subj]} ${Math.round(pct*100)}%</div>`; });
+    el.innerHTML = `<div style="width:80px;height:80px;border-radius:50%;background:conic-gradient(${grads.slice(0,-1)});"></div><div style="display:flex;flex-direction:column;gap:4px;">${legend}</div>`;
+  },
+  initCharts() { window.addEventListener('resize',()=>{ if(appData&&appData.currentChildId) this.renderStats(); }); }
+};
+
+// ==================== PosterManager 海报生成 ====================
+const PosterManager = {
+  showPoster() {
+    const child = appData.children.find(c=>c.id===appData.currentChildId); if(!child) return;
+    UIManager.showModal('posterModal');
+    setTimeout(()=>this.generatePoster(child),100);
+  },
+  generatePoster(child) {
+    const canvas = document.getElementById('posterCanvas'); const ctx = canvas.getContext('2d');
+    const w=360, h=640; canvas.width=w; canvas.height=h;
+    // 背景
+    const grad = ctx.createLinearGradient(0,0,0,h); grad.addColorStop(0,'#667eea'); grad.addColorStop(1,'#764ba2');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,w,h);
+    // 装饰
+    for(let i=0;i<20;i++){ ctx.beginPath(); ctx.arc(Math.random()*w,Math.random()*h,Math.random()*30+10,0,Math.PI*2); ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fill(); }
+    // 标题
+    ctx.fillStyle='white'; ctx.font='bold 28px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('暑假自律打卡',w/2,80);
+    ctx.font='16px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.8)';
+    ctx.fillText(new Date().toLocaleDateString('zh-CN'),w/2,110);
+    // 孩子名
+    ctx.font='bold 22px sans-serif'; ctx.fillStyle='white';
+    ctx.fillText(child.name+'的打卡海报',w/2,160);
+    // 数据卡片
+    const done = appData.tasks.filter(t=>t.childId===child.id&&t.status==='approved').length;
+    const streak = StatsManager.getStreak(child.id);
+    const stars = child.stars||0;
+    const cards = [{label:'已完成',value:done,icon:'✅'},{label:'连续打卡',value:streak+'天',icon:'🔥'},{label:'星星总数',value:stars,icon:'⭐'}];
+    cards.forEach((c,i)=>{ const x=30+i*110; ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.roundRect(x,200,100,90,12); ctx.fill(); ctx.font='bold 24px sans-serif'; ctx.fillStyle='white'; ctx.textAlign='center'; ctx.fillText(c.value,x+50,250); ctx.font='13px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.fillText(c.label,x+50,275); });
+    // 激励语
+    ctx.font='18px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.textAlign='center';
+    ctx.fillText(ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)],w/2,340);
+    // 底部
+    ctx.font='12px sans-serif'; ctx.fillStyle='rgba(255,255,255,0.5)';
+    ctx.fillText('暑假自律打卡 - 亲子版',w/2,610);
+  },
+  downloadPoster() {
+    const canvas = document.getElementById('posterCanvas');
+    const link = document.createElement('a'); link.download='打卡海报_'+new Date().toLocaleDateString()+'.png';
+    link.href = canvas.toDataURL('image/png'); link.click(); UIManager.showToast('海报已保存');
+  }
+};
+
+// ==================== VoiceManager 语音播报 ====================
+const VoiceManager = {
+  speak(text) {
+    if(!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang='zh-CN'; u.rate=1.1; u.pitch=1.2;
+    window.speechSynthesis.speak(u);
+  }
+};
+
+// ==================== NotificationManager 提醒管理 ====================
+const NotificationManager = {
+  init() {
+    if('Notification' in window && Notification.permission === 'granted') this.scheduleReminder();
+    else if('Notification' in window && Notification.permission === 'default') { /* 等用户交互后请求 */ }
+  },
+  requestPermission() {
+    if(!('Notification' in window)) return;
+    Notification.requestPermission().then(p=>{ if(p==='granted'){ this.scheduleReminder(); UIManager.showToast('已开启提醒'); } });
+  },
+  scheduleReminder() {
+    if(!appData.settings.reminderEnabled) return;
+    const [h,m] = (appData.settings.reminderTime||'09:00').split(':');
+    const now = new Date(); const target = new Date(); target.setHours(parseInt(h),parseInt(m),0,0);
+    if(target<=now) target.setDate(target.getDate()+1);
+    const ms = target - now;
+    setTimeout(()=>{ this.sendReminder(); this.scheduleReminder(); }, ms);
+  },
+  sendReminder() {
+    const child = appData.children.find(c=>c.id===appData.currentChildId);
+    const pending = appData.tasks.filter(t=>t.childId===appData.currentChildId && t.status==='pending').length;
+    const msg = child ? `⏰ ${child.name}，今天还有 ${pending} 个任务等待完成哦！` : '⏰ 记得完成今天的打卡任务！';
+    if(Notification.permission==='granted') new Notification('暑假自律打卡',{body:msg,icon:'🌟'});
+    UIManager.showNotification(msg);
+  }
+};
+
+// ==================== ThemeManager 主题管理 ====================
+const ThemeManager = {
+  init() {
+    const saved = appData.settings.theme || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+    this.updateToggleIcon(saved);
+  },
+  toggle() {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = current==='light'?'dark':'light';
+    document.documentElement.setAttribute('data-theme', next);
+    appData.settings.theme = next;
+    DataManager.save();
+    this.updateToggleIcon(next);
+  },
+  updateToggleIcon(theme) { document.querySelector('.theme-toggle').textContent = theme==='light'?'🌙':'☀️'; }
+};
+
+// ==================== ImageCompressor 图片压缩 ====================
+const ImageCompressor = {
+  compress(file) {
+    return new Promise((resolve,reject)=>{
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+          let w = img.width, h = img.height;
+          if(w>MAX_IMG_WIDTH){ h = Math.round(h*MAX_IMG_WIDTH/w); w = MAX_IMG_WIDTH; }
+          const canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+          const ctx = canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+          const dataUrl = canvas.toDataURL('image/jpeg', IMG_QUALITY);
+          // 缩略图
+          const tw = 120; const th = Math.round(h*tw/w);
+          const tc = document.createElement('canvas'); tc.width=tw; tc.height=th;
+          tc.getContext('2d').drawImage(img,0,0,tw,th);
+          const thumb = tc.toDataURL('image/jpeg', 0.5);
+          resolve({dataUrl, thumb, width:w, height:h});
+        }; img.onerror = reject;
+        img.src = e.target.result;
+      }; reader.onerror = reject; reader.readAsDataURL(file);
+    });
+  }
+};
+
+// ==================== Utils 工具函数 ====================
+const Utils = {
+  getTodayString(d) { const x=d||new Date(); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; },
+  getLocalDateString(ts) { if(!ts) return ''; const d=new Date(ts); if(isNaN(d)) return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; },
+  filterTasksByStatus(tasks,status){ if(status==='all') return tasks; return tasks.filter(t=>t.status===status); }
+};
+
+// ==================== 初始化 ====================
+
+// PWA Service Worker 注册
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').then(function(reg) {
+    console.log('Service Worker registered');
+  }).catch(function(err) {
+    console.log('Service Worker registration failed:', err);
+  });
+}
+// iOS 状态栏安全区域适配
+document.documentElement.style.setProperty('--safe-top', 'env(safe-area-inset-top)');
+
+document.addEventListener('DOMContentLoaded', () => {
+  App.init();
+  // 点击模态框背景关闭
+  document.querySelectorAll('.modal-overlay').forEach(m=>{
+    m.addEventListener('click', e=>{ if(e.target===m) UIManager.closeModal(m.id); });
+  });
+  // 触摸反馈优化
+  document.addEventListener('touchstart', ()=>{}, {passive:true});
+});
+</script>
+</body>
+</html>
